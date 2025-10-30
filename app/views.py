@@ -117,6 +117,13 @@ def agregarEntradaExtraccion(request):
         return render(request, 'autodiagnostico/extraccion/entrada/agregar_entrada.html')
 
 
+def eliminarEntradaExtraccion(request, id):
+    entrada = get_object_or_404(Entrada, id_entrada=id, usuario=request.user)
+    entrada.delete()
+    messages.success(request, "Entrada eliminada correctamente.")
+    return redirect('agregar_entrada_extraccion')
+
+
 def agregarSalidaExtraccion(request):
     if request.user.is_authenticated:
         registros = RegistroTrabajador.objects.filter(usuario=request.user)
@@ -149,7 +156,11 @@ def agregarSalidaExtraccion(request):
     else:
         return render(request, 'autodiagnostico/extraccion/entrada/agregar_salida.html')
 
-
+def eliminarSalidaExtraccion(request, id):
+    salida = get_object_or_404(Salida, id_salida=id, usuario=request.user)
+    salida.delete()
+    messages.success(request, "Salida eliminada correctamente.")
+    return redirect('agregar_salida_extraccion')
 
 
 def agregarOportunidadExtraccion(request):
@@ -183,8 +194,11 @@ def agregarOportunidadExtraccion(request):
     else:
         return render(request, 'autodiagnostico/extraccion/oportunidad/agregar_oportunidad.html')
 
-
-
+def eliminarOportunidadExtraccion(request, id):
+    oportunidad = get_object_or_404(Oportunidades, id_oportunidad=id, usuario=request.user)
+    oportunidad.delete()
+    messages.success(request, "Oportunidad eliminada correctamente.")
+    return redirect('agregar_oportunidad_extraccion')
 
 
 
@@ -236,6 +250,12 @@ def agregarEntradaDiseño(request):
         return render(request, 'autodiagnostico/diseñoProduccion/entrada/agregar_entrada.html')
 
 
+def eliminarEntradaDiseño(request, id):
+    entrada = get_object_or_404(Entrada, id_entrada=id, usuario=request.user)
+    entrada.delete()
+    messages.success(request, "Entrada eliminada correctamente.")
+    return redirect('agregar_entrada_diseño')
+
 
 def agregarSalidaDiseño(request):
     if request.user.is_authenticated:
@@ -268,6 +288,14 @@ def agregarSalidaDiseño(request):
     else:
         return render(request, 'autodiagnostico/diseñoProduccion/entrada/agregar_salida.html')
 
+
+def eliminarSalidaDiseño(request, id):
+    salida = get_object_or_404(Salida, id_salida=id, usuario=request.user)
+    salida.delete()
+    messages.success(request, "Salida eliminada correctamente.")
+    return redirect('agregar_salida_diseño')
+
+
 def agregarOportunidadDiseño(request):
     if request.user.is_authenticated:
         registros = RegistroTrabajador.objects.filter(usuario=request.user)
@@ -298,6 +326,14 @@ def agregarOportunidadDiseño(request):
         return render(request,'autodiagnostico/diseñoProduccion/oportunidad/agregar_oportunidad.html', data)
     else:
         return render(request, 'autodiagnostico/diseñoProduccion/oportunidad/agregar_oportunidad.html')
+
+
+def eliminarOportunidadDiseño(request, id):
+    oportunidad = get_object_or_404(Oportunidades, id_oportunidad=id, usuario=request.user)
+    oportunidad.delete()
+    messages.success(request, "Oportunidad eliminada correctamente.")
+    return redirect('agregar_oportunidad_diseño')
+
 
 
 # logistica
@@ -344,6 +380,13 @@ def agregarEntradaLogistica(request):
         return render(request, 'autodiagnostico/logistica/entrada/agregar_entrada.html')
 
 
+def eliminarEntradaLogistica(request, id):
+    entrada = get_object_or_404(Entrada, id_entrada=id, usuario=request.user)
+    entrada.delete()
+    messages.success(request, "Entrada eliminada correctamente.")
+    return redirect('agregar_entrada_logistica')
+
+
 def agregarSalidaLogistica(request):
     if request.user.is_authenticated:
         registros = RegistroTrabajador.objects.filter(usuario=request.user)
@@ -376,6 +419,14 @@ def agregarSalidaLogistica(request):
         return render(request, 'autodiagnostico/logistica/entrada/agregar_salida.html')
 
 
+def eliminarSalidaLogistica(request, id):
+    salida = get_object_or_404(Salida, id_salida=id, usuario=request.user)
+    salida.delete()
+    messages.success(request, "Salida eliminada correctamente.")
+    return redirect('agregar_salida_logistica')
+
+
+
 def agregarOportunidadLogistica(request):
     if request.user.is_authenticated:
         registros = RegistroTrabajador.objects.filter(usuario=request.user)
@@ -406,6 +457,13 @@ def agregarOportunidadLogistica(request):
         return render(request,'autodiagnostico/logistica/oportunidad/agregar_oportunidad.html', data)
     else:
         return render(request, 'autodiagnostico/logistica/oportunidad/agregar_oportunidad.html')
+
+def eliminarOportunidadLogistica(request, id):
+    oportunidad = get_object_or_404(Oportunidades, id_oportunidad=id, usuario=request.user)
+    oportunidad.delete()
+    messages.success(request, "Oportunidad eliminada correctamente.")
+    return redirect('agregar_oportunidad_logistica')
+
 
 
 #compra
@@ -451,6 +509,12 @@ def agregarEntradaCompra(request):
     else:
         return render(request, 'autodiagnostico/compra/entrada/agregar_entrada.html')   
 
+def eliminarEntradaCompra(request, id):
+    entrada = get_object_or_404(Entrada, id_entrada=id, usuario=request.user)
+    entrada.delete()
+    messages.success(request, "Entrada eliminada correctamente.")
+    return redirect('agregar_entrada_compra')
+
 
 def agregarSalidaCompra(request):
     if request.user.is_authenticated:
@@ -481,7 +545,15 @@ def agregarSalidaCompra(request):
                 data["form"] = formulario
         return render(request,'autodiagnostico/compra/salida/agregar_salida.html', data)
     else:
-        return render(request,'autodiagnostico/compra/salida/agregar_salida.html')       
+        return render(request,'autodiagnostico/compra/salida/agregar_salida.html')  
+
+
+def eliminarSalidaCompra(request, id):
+    salida = get_object_or_404(Salida, id_salida=id, usuario=request.user)
+    salida.delete()
+    messages.success(request, "Salida eliminada correctamente.")
+    return redirect('agregar_salida_compra')
+
 
 
 def agregarOportunidadCompra(request):
@@ -513,7 +585,14 @@ def agregarOportunidadCompra(request):
                 data["form"] = formulario
         return render(request,'autodiagnostico/compra/oportunidad/agregar_oportunidad.html', data)
     else:
-        return render(request, 'autodiagnostico/compra/oportunidad/agregar_oportunidad.html')        
+        return render(request, 'autodiagnostico/compra/oportunidad/agregar_oportunidad.html') 
+
+def eliminarOportunidadCompra(request, id):
+    oportunidad = get_object_or_404(Oportunidades, id_oportunidad=id, usuario=request.user)
+    oportunidad.delete()
+    messages.success(request, "Oportunidad eliminada correctamente.")
+    return redirect('agregar_oportunidad_compra')
+
 
 
 #Uso consumo
@@ -557,7 +636,14 @@ def agregarEntradaUso(request):
                 data["form"] = formulario
         return render(request,'autodiagnostico/usoConsumo/entrada/agregar_entrada.html', data)
     else:
-        return render(request, 'autodiagnostico/usoConsumo/entrada/agregar_entrada.html')       
+        return render(request, 'autodiagnostico/usoConsumo/entrada/agregar_entrada.html')    
+
+
+def eliminarEntradaUsoConsumo(request, id):
+    entrada = get_object_or_404(Entrada, id_entrada=id, usuario=request.user)
+    entrada.delete()
+    messages.success(request, "Entrada eliminada correctamente.")
+    return redirect('agregar_entrada_uso_consumo')
 
 
 def agregarSalidaUso(request):
@@ -592,6 +678,13 @@ def agregarSalidaUso(request):
         return render(request,'autodiagnostico/usoConsumo/salida/agregar_salida.html')       
 
 
+def eliminarSalidaUso(request, id):
+    salida = get_object_or_404(Salida, id_salida=id, usuario=request.user)
+    salida.delete()
+    messages.success(request, "Salida eliminada correctamente.")
+    return redirect('agregar_salida_uso')
+
+
 
 def agregarOportunidadUso(request):
     if request.user.is_authenticated:
@@ -623,6 +716,12 @@ def agregarOportunidadUso(request):
         return render(request,'autodiagnostico/usoConsumo/oportunidad/agregar_oportunidad.html', data)
     else:
         return render(request, 'autodiagnostico/usoConsumo/oportunidad/agregar_oportunidad.html')   
+
+def eliminarOportunidadUso(request, id):
+    oportunidad = get_object_or_404(Oportunidades, id_oportunidad=id, usuario=request.user)
+    oportunidad.delete()
+    messages.success(request, "Oportunidad eliminada correctamente.")
+    return redirect('agregar_oportunidad_uso')
 
 
 # Fin de vida
@@ -666,9 +765,14 @@ def agregarEntradaFin(request):
                 data["form"] = formulario
         return render(request,'autodiagnostico/finVida/entrada/agregar_entrada.html', data)
     else:
-        return render(request, 'autodiagnostico/finVida/entrada/agregar_entrada.html')       
+        return render(request, 'autodiagnostico/finVida/entrada/agregar_entrada.html')  
 
 
+def eliminarEntradaFinVida(request, id):
+    entrada = get_object_or_404(Entrada, id_entrada=id, usuario=request.user)
+    entrada.delete()
+    messages.success(request, "Entrada eliminada correctamente.")
+    return redirect('agregar_entrada_fin_vida')
 
 
 def agregarSalidaFin(request):
@@ -700,7 +804,14 @@ def agregarSalidaFin(request):
                 data["form"] = formulario
         return render(request,'autodiagnostico/finVida/salida/agregar_salida.html', data)
     else:
-        return render(request,'autodiagnostico/finVida/salida/agregar_salida.html')     
+        return render(request,'autodiagnostico/finVida/salida/agregar_salida.html') 
+
+
+def eliminarSalidaFinVida(request, id):
+    salida = get_object_or_404(Salida, id_salida=id, usuario=request.user)
+    salida.delete()
+    messages.success(request, "Salida eliminada correctamente.")
+    return redirect('agregar_salida_fin_vida')
 
 
 
@@ -734,3 +845,9 @@ def agregarOportunidadFin(request):
         return render(request,'autodiagnostico/finVida/oportunidad/agregar_oportunidad.html', data)
     else:
         return render(request, 'autodiagnostico/finVida/oportunidad/agregar_oportunidad.html') 
+
+def eliminarOportunidadFinVida(request, id):
+    oportunidad = get_object_or_404(Oportunidades, id_oportunidad=id, usuario=request.user)
+    oportunidad.delete()
+    messages.success(request, "Oportunidad eliminada correctamente.")
+    return redirect('agregar_oportunidad_fin_vida')

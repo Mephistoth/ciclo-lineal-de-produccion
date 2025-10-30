@@ -6,7 +6,15 @@
 
 {% block extraccion %}
 <div class="container">
-    
+
+    {% if messages %}
+    <div class="alert alert-success" role="alert">
+        {% for message in messages %}
+        {{ message }}
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <form action="" method="post">
         <h4>Ingresa una entrada</h4>
         {% csrf_token %}
@@ -23,34 +31,41 @@
 
 <div class="row row-cols-1 row-cols-md-3 g-4">
     {% for p in entradas %}
-    
+
     {% if p.etapa.nombre == "Extraccion materia prima" %}
-    
-        <div class="col">
-            <div class="card text-bg-warning">
-                <div class="card-body">
-                    <h5 class="card-title">{{p.etapa}}</h5>
-                    <p class="card-text">{{p.nombre}}</p>
-                </div>
+
+    <div class="col">
+        <div class="card text-bg-warning">
+            <div class="card-body">
+                <h5 class="card-title">{{p.etapa}}</h5>
+                <p class="card-text">{{p.nombre}}</p>
+                <form action="{% url 'eliminar_entrada_extraccion' p.id_entrada %}" method="post"
+                    style="margin-top:10px;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        Eliminar
+                    </button>
+                </form>
             </div>
         </div>
-    
+    </div>
+
     {% endif %}
-    
+
     {% endfor %}
 </div>
 
 <div>
-    
-    
-    {% for u in areaTrabajador  %}
-        <h1>{{ u.id_area }}</h1>
-        
+
+
+    {% for u in areaTrabajador %}
+    <h1>{{ u.id_area }}</h1>
+
     {% endfor %}
-        
+
 </div>
 <script>
     document.getElementById("entrada").className = "btn btn-success";
 </script>
+
 {% endblock extraccion %}
-    
