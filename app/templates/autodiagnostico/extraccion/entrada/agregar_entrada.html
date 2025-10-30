@@ -1,0 +1,56 @@
+{% extends 'autodiagnostico/extraccion/home_extraccion.html' %}
+{% load static %}
+{% block titulo %}Odyssey | Home{% endblock %}
+{% load crispy_forms_tags %}
+
+
+{% block extraccion %}
+<div class="container">
+    
+    <form action="" method="post">
+        <h4>Ingresa una entrada</h4>
+        {% csrf_token %}
+        {{form | crispy}}
+
+        <div>
+
+            <input type="submit" class="btn btn-primary" value="ingresar">
+        </div>
+    </form>
+</div>
+<br>
+<h4>Tus entradas</h4>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for p in entradas %}
+    
+    {% if p.etapa.nombre == "Extraccion materia prima" %}
+    
+        <div class="col">
+            <div class="card text-bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">{{p.etapa}}</h5>
+                    <p class="card-text">{{p.nombre}}</p>
+                </div>
+            </div>
+        </div>
+    
+    {% endif %}
+    
+    {% endfor %}
+</div>
+
+<div>
+    
+    
+    {% for u in areaTrabajador  %}
+        <h1>{{ u.id_area }}</h1>
+        
+    {% endfor %}
+        
+</div>
+<script>
+    document.getElementById("entrada").className = "btn btn-success";
+</script>
+{% endblock extraccion %}
+    
