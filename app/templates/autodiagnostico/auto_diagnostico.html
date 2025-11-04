@@ -8,7 +8,7 @@
 <html>
 
 <head>
-    <title>ciclo Lineal</title>
+    <title>ciclo Circular</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
@@ -46,15 +46,14 @@
 
 
                     {% if user.is_staff %}
-                    <h3>Bienvenido Administrador </h3>
-                    <h3>{{ user.username }}</h3>
+                    <h3>Bienvenido Admin, {{ user.first_name }}</h3>
                     {% else %}
                     {% for i in registros %}
                     <div class="mb-2">
                         <h4>Empresa: {{ i.id_area.id_empresa.nombre}}</h4>
                         <h4>Área: {{ i.id_area.nombre}}</h4>
                     </div>
-                    <h3>Hola, bienvenido {{user.username}}</h3>
+                    <h3>Hola, bienvenido {{user.first_name}}</h3>
                     {% endfor %}
 
                     {% endif %}
@@ -65,66 +64,72 @@
 
             </div>
 
+            <div>
+                {% if user.is_staff %}
+                <h2 class="titulo-seccion text-center my-4">REGISTROS</h2>
+                {% endif %}
+            </div>
+
             <hr>
 
             <h3>¿Qué etapa deseas ver?</h3>
             <div class="row">
-                    <div class="col-auto"><strong>1.</strong></div>
-                    <div class="col">
-                        <a href="{% url 'extraccion_materiaPrima' %}"><button type="button" id="extraccion"
-                                class="selected">Extracción Materia Prima</button></a>
-                    </div>
-                    <div class="col-auto"><strong>2.</strong></div>
-                    <div class="col">
-                        <a href="{% url 'diseño_Produccion' %}"><button type="button" id="diseño">Diseño y
-                                producción</button></a>
-                    </div>
-                    <div class="col-auto"><strong>3.</strong></div>
-                    <div class="col">
-                        <a href="{% url 'logistica' %}"><button type="button" id="logistica">Logística</button></a>
-                    </div>
+                <div class="col-auto"><strong>1.</strong></div>
+                <div class="col">
+                    <a href="{% url 'extraccion_materiaPrima' %}"><button type="button" id="extraccion"
+                            class="selected">Extracción Materia Prima</button></a>
                 </div>
-                <br>
-                <div class="row">
-                    <div class="col-auto"><strong>4.</strong></div>
-                    <div class="col">
-                        <a href="{% url 'compra' %}"><button type="button" id="compra">Compra</button></a>
-                    </div>
-                    <div class="col-auto"><strong>5.</strong></div>
-                    <div class="col">
-                        <a href="{% url 'uso_consumo' %}"><button type="button" id="uso">Uso consumo</button></a>
-                    </div>
-                    <div class="col-auto"><strong>6.</strong></div>
-                    <div class="col">
-                        <a href="{% url 'fin_vida' %}"><button type="button" id="fin">Fin de vida</button></a>
-                    </div>
+                <div class="col-auto"><strong>2.</strong></div>
+                <div class="col">
+                    <a href="{% url 'diseño_Produccion' %}"><button type="button" id="diseño">Diseño y
+                            producción</button></a>
                 </div>
-
-
-
-                <hr>
-
-                {% block body %}{% endblock %}
+                <div class="col-auto"><strong>3.</strong></div>
+                <div class="col">
+                    <a href="{% url 'logistica' %}"><button type="button" id="logistica">Logística</button></a>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-auto"><strong>4.</strong></div>
+                <div class="col">
+                    <a href="{% url 'compra' %}"><button type="button" id="compra">Compra</button></a>
+                </div>
+                <div class="col-auto"><strong>5.</strong></div>
+                <div class="col">
+                    <a href="{% url 'uso_consumo' %}"><button type="button" id="uso">Uso consumo</button></a>
+                </div>
+                <div class="col-auto"><strong>6.</strong></div>
+                <div class="col">
+                    <a href="{% url 'fin_vida' %}"><button type="button" id="fin">Fin de vida</button></a>
+                </div>
             </div>
 
-            {% else %}
-            <h1>Registra la empresa y el area a la que perteneces!!!!</h1>
-            <a href="{% url 'agregar_Area' user.id  %}"><button type="button">Aqui</button></a>
 
-            {% endif %}
 
-            {% else %}
-            <h1>Inicia Session</h1>
-            <p>Para acceder a tu Auto Diagnostico </p>
-            <a href="{% url 'login'  %}"><button type="button">Inicia Session</button></a>
-
-            {% endif %}
             <hr>
 
+            {% block body %}{% endblock %}
         </div>
+
+        {% else %}
+        <h1>Registra la empresa y el area a la que perteneces!!!!</h1>
+        <a href="{% url 'agregar_Area' user.id  %}"><button type="button">Aqui</button></a>
+
+        {% endif %}
+
+        {% else %}
+        <h1>Inicia Session</h1>
+        <p>Para acceder a tu Auto Diagnostico </p>
+        <a href="{% url 'login'  %}"><button type="button">Inicia Session</button></a>
+
+        {% endif %}
         <hr>
 
-        <hr>
+    </div>
+    <hr>
+
+    <hr>
     </div>
 
     <!-- Header -->

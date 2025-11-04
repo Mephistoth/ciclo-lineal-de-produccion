@@ -8,7 +8,7 @@
 <html>
 
 <head>
-    <title>ciclo Lineal</title>
+    <title>ciclo Circular</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 
@@ -34,44 +34,60 @@
             </div>
             <div class="content">
                 <div class="inner">
-                    <h1>Diagnóstico Ciclo Lineal</h1>
-                    
+                    <h1>Diagnóstico Ciclo Circular</h1>
+
                     {% if user.is_authenticated %}
-                        
-                    
-                        <p>Si deseas realizar tus registros a traves de telegram preciona <a href="{% url 'agregar_telegram' user.id %}">aqui</a> </p>
+
+
+                    <p>Si deseas realizar tus registros a traves de telegram preciona <a
+                            href="{% url 'agregar_telegram' user.id %}">aqui</a> </p>
                     {% endif %}
-                    
+
                 </div>
             </div>
+
             <nav>
                 <ul>
-                    
+
                     <!-- <li><a href="#about">About</a></li> -->
-                    
-                    
+
+
                     {% if user.is_staff %}
                     <li><a href="{% url 'auto_diagnostico' %}">Registros</a></li>
                     <li><a href="{% url 'home_admin' %}">Frecuencias</a></li>
-                    <li  style="border-left: 1px solid white;"><a href="{% url 'home_graficos' %}">Graficos</a></li>
-                    <li  style="border-left: 1px solid white;"><a href="{% url 'log_telegram' %}">Log Telegram</a></li>
-                    <li  style="border-left: 1px solid white;"><a href="admin/">Admin Django</a></li>
-                    <li  style="border-left: 1px solid white;"><a href="{% url 'Home_api' %}">APIS</a></li>
-                    {% else %}
-                    <li><a href="{% url 'auto_diagnostico' %}">Auto Diagnostico</a></li>
+                    <li style="border-left: 1px solid white;"><a href="{% url 'home_graficos' %}">Graficos</a></li>
+                    <li style="border-left: 1px solid white;"><a href="{% url 'log_telegram' %}">Log Telegram</a></li>
+                    <li style="border-left: 1px solid white;"><a href="admin/">Admin Django</a></li>
+                    <li style="border-left: 1px solid white;"><a href="{% url 'Home_api' %}">APIS</a></li>
                     {% endif %}
-                        
-                    
+
+
                     <!--<li><a href="#elements">Elements</a></li>-->
                 </ul>
             </nav>
+
             <nav>
                 <ul>
                     {% if user.is_authenticated %}
-                    <li><a href="{% url 'logout' %}">Cerrar Session</a></li>
+                    <li><a href="{% url 'logout' %}">Cerrar Sesion</a></li>
                     {% else %}
                     <li><a href="{% url 'login' %}">inicia Sesion</a></li>
                     {% endif %}
+                </ul>
+            </nav>
+
+            <nav>
+                <ul>
+
+                    <!-- <li><a href="#about">About</a></li> -->
+
+
+                    {% if not user.is_staff %}
+                    <li><a href="{% url 'auto_diagnostico' %}">Auto Diagnóstico</a></li>
+                    {% endif %}
+
+
+                    <!--<li><a href="#elements">Elements</a></li>-->
                 </ul>
             </nav>
         </header>
@@ -126,32 +142,32 @@
                 {% if user.is_authenticated %}
 
 
-                    {% if registros %}
-                        <div class="container-sm">
-                            <div class="row">
-                                {% for p in registros %}
-                                    <h3>{{p.id_area}}</h3>
-                                {% endfor %}
-                                <h3>Hola!! {{user.username}}</h3>
-                            </div>
-                            <hr>
-                            <h4>Ingresa Tus notas</h4>
-                            <div class="row">
-                                <div class="col">
-                                    <a href="#"><button type="button">Entradas</button></a>
-                                </div>
-                                <div class="col">
-                                    <a href="#"><button type="button">Salidas</button></a>
-                                </div>
-                                <div class="col">
-                                    <a href="#"><button type="button">Oportunidades</button></a>
-                                </div>
-                            </div>
+                {% if registros %}
+                <div class="container-sm">
+                    <div class="row">
+                        {% for p in registros %}
+                        <h3>{{p.id_area}}</h3>
+                        {% endfor %}
+                        <h3>Hola!! {{user.username}}</h3>
+                    </div>
+                    <hr>
+                    <h4>Ingresa Tus notas</h4>
+                    <div class="row">
+                        <div class="col">
+                            <a href="#"><button type="button">Entradas</button></a>
                         </div>
+                        <div class="col">
+                            <a href="#"><button type="button">Salidas</button></a>
+                        </div>
+                        <div class="col">
+                            <a href="#"><button type="button">Oportunidades</button></a>
+                        </div>
+                    </div>
+                </div>
 
                 {% else %}
-                    <h1>Registra la empresa y el area a la que perteneces!!!!</h1>
-                    <a href="{% url 'agregar_Area' user.id  %}"><button type="button">Aqui</button></a>
+                <h1>Registra la empresa y el area a la que perteneces!!!!</h1>
+                <a href="{% url 'agregar_Area' user.id  %}"><button type="button">Aqui</button></a>
 
                 {% endif %}
 
@@ -204,9 +220,9 @@
                     <li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
                 </ul> -->
                 {% else %}
-                <h1>Inicia Session</h1>
+                <h1>Inicia Sesion</h1>
                 <p>Para acceder a tu Auto Diagnostico </p>
-                <a href="{% url 'login'  %}"><button type="button">Inicia Session</button></a>
+                <a href="{% url 'login'  %}"><button type="button">Inicia Sesion</button></a>
 
                 {% endif %}
             </article>
