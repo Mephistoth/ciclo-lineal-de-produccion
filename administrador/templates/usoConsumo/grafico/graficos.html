@@ -8,7 +8,7 @@
 
 
 <div class="container-sm" id="grafico">
-    <canvas id="myChart{{a.id_area}}"></canvas>
+    <canvas id="myChart{{a.id_area}}" style="margin-top: 55px;"></canvas>
 </div>
 
 
@@ -19,7 +19,6 @@
 
 
 <script>
-
     const ctx{{ a.id_area }} = document.getElementById('myChart{{a.id_area}}').getContext('2d');
     const myChart{{ a.id_area }} = new Chart(ctx{{ a.id_area }}, {
         type: 'bar',
@@ -51,16 +50,33 @@
             plugins: {
                 title: {
                     display: true,
-                    text: 'Chart.js Bar Chart - Stacked'
+                    text: 'Número de ingresos por día y tipo',
+                    font: {
+                        size: 20
+                    }
                 },
             },
             responsive: true,
             scales: {
                 x: {
                     stacked: true,
+                    title: {
+                        display: true,
+                        text: 'Fecha',
+                        font: {
+                            size: 18
+                        }
+                    }
                 },
                 y: {
-                    stacked: true
+                    stacked: true,
+                    title: {
+                        display: true,
+                        text: 'Cantidad',
+                        font: {
+                            size: 18
+                        }
+                    }
                 }
             }
         }

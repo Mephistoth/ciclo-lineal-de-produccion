@@ -2468,14 +2468,13 @@ def graficosExtraccion(request, id):
         dias_total = []
      
         for e in entradas:
-                dias_total.append(e.fecha)
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         for e in salidas:
-                dias_total.append(e.fecha)
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         for e in oportunidades:
-                dias_total.append(e.fecha)                  
-       
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         #print("list original", dias_total)
 
@@ -2499,7 +2498,7 @@ def graficosExtraccion(request, id):
 
         for d in diccionario:
                 for e in entradas:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 diccionario[d] = diccionario[d] +1
                                 print(diccionario[d])
 
@@ -2512,7 +2511,7 @@ def graficosExtraccion(request, id):
         ######## entradas ##############
         fechas = []
         for e in entradas:
-                fechas.append(e.fecha)
+                fechas.append(e.fecha.strftime("%d/%m/%Y"))
 
         c = collections.Counter(fechas)
            
@@ -2531,7 +2530,7 @@ def graficosExtraccion(request, id):
 
         for d in dicc_salidas:
                 for e in salidas:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 dicc_salidas[d] = dicc_salidas[d] +1
                                 
 
@@ -2549,7 +2548,7 @@ def graficosExtraccion(request, id):
 
         for d in dicc_oportunidades:
                 for e in oportunidades:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 dicc_oportunidades[d] = dicc_oportunidades[d] +1
                                 
 
@@ -2637,14 +2636,13 @@ def graficosDiseño(request, id):
         dias_total = []
      
         for e in entradas:
-                dias_total.append(e.fecha)
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         for e in salidas:
-                dias_total.append(e.fecha)
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         for e in oportunidades:
-                dias_total.append(e.fecha)                  
-       
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         #print("list original", dias_total)
 
@@ -2670,14 +2668,14 @@ def graficosDiseño(request, id):
 
         for d in diccionario:
                 for e in entradas:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 diccionario[d] = diccionario[d] +1
                                 print(diccionario[d])
 
         print(diccionario)
         clave_dicc = diccionario.keys()
         valor_dicc = diccionario.values()
-        cantidad_datos_dicc = diccionario.items()
+        cantidad_datos_dicc = diccionario.items() 
 
 
 
@@ -2690,7 +2688,7 @@ def graficosDiseño(request, id):
 
         for d in dicc_salidas:
                 for e in salidas:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 dicc_salidas[d] = dicc_salidas[d] +1
                                 
 
@@ -2708,7 +2706,7 @@ def graficosDiseño(request, id):
 
         for d in dicc_oportunidades:
                 for e in oportunidades:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 dicc_oportunidades[d] = dicc_oportunidades[d] +1
                                 
 
@@ -2795,14 +2793,13 @@ def graficosLogistica(request, id):
         dias_total = []
      
         for e in entradas:
-                dias_total.append(e.fecha)
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         for e in salidas:
-                dias_total.append(e.fecha)
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         for e in oportunidades:
-                dias_total.append(e.fecha)                  
-       
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         #print("list original", dias_total)
 
@@ -2828,7 +2825,7 @@ def graficosLogistica(request, id):
 
         for d in diccionario:
                 for e in entradas:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 diccionario[d] = diccionario[d] +1
                                 print(diccionario[d])
 
@@ -2848,7 +2845,7 @@ def graficosLogistica(request, id):
 
         for d in dicc_salidas:
                 for e in salidas:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 dicc_salidas[d] = dicc_salidas[d] +1
                                 
 
@@ -2866,7 +2863,7 @@ def graficosLogistica(request, id):
 
         for d in dicc_oportunidades:
                 for e in oportunidades:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 dicc_oportunidades[d] = dicc_oportunidades[d] +1
                                 
 
@@ -2951,14 +2948,13 @@ def graficosCompra(request, id):
         dias_total = []
      
         for e in entradas:
-                dias_total.append(e.fecha)
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         for e in salidas:
-                dias_total.append(e.fecha)
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         for e in oportunidades:
-                dias_total.append(e.fecha)                  
-       
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         #print("list original", dias_total)
 
@@ -2984,7 +2980,7 @@ def graficosCompra(request, id):
 
         for d in diccionario:
                 for e in entradas:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 diccionario[d] = diccionario[d] +1
                                 print(diccionario[d])
 
@@ -3004,7 +3000,7 @@ def graficosCompra(request, id):
 
         for d in dicc_salidas:
                 for e in salidas:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 dicc_salidas[d] = dicc_salidas[d] +1
                                 
 
@@ -3022,7 +3018,7 @@ def graficosCompra(request, id):
 
         for d in dicc_oportunidades:
                 for e in oportunidades:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 dicc_oportunidades[d] = dicc_oportunidades[d] +1
                                 
 
@@ -3085,7 +3081,7 @@ def graficosUso(request, id):
         
            
         ################################ fechas ################################################
-        #mosrar en el vertice x del graficp la fechas de ingreso de las notas(entrada, salida, oportunidad) sin repetir las fechas
+        #mosrar en el vertice x del grafico la fechas de ingreso de las notas(entrada, salida, oportunidad) sin repetir las fechas
 
         etapa = Etapa.objects.get(nombre = "Uso consumo") #trar solo la ID de la etapa "Extraccion materia prima"
         entradas = Entrada.objects.filter(etapa_id = etapa, id_area = id)
@@ -3107,13 +3103,13 @@ def graficosUso(request, id):
         dias_total = []
      
         for e in entradas:
-                dias_total.append(e.fecha)
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         for e in salidas:
-                dias_total.append(e.fecha)
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         for e in oportunidades:
-                dias_total.append(e.fecha)                  
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
        
 
         #print("list original", dias_total)
@@ -3140,7 +3136,7 @@ def graficosUso(request, id):
 
         for d in diccionario:
                 for e in entradas:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 diccionario[d] = diccionario[d] +1
                                 print(diccionario[d])
 
@@ -3160,7 +3156,7 @@ def graficosUso(request, id):
 
         for d in dicc_salidas:
                 for e in salidas:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 dicc_salidas[d] = dicc_salidas[d] +1
                                 
 
@@ -3178,7 +3174,7 @@ def graficosUso(request, id):
 
         for d in dicc_oportunidades:
                 for e in oportunidades:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 dicc_oportunidades[d] = dicc_oportunidades[d] +1
                                 
 
@@ -3263,14 +3259,13 @@ def graficosFin(request, id):
         dias_total = []
      
         for e in entradas:
-                dias_total.append(e.fecha)
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         for e in salidas:
-                dias_total.append(e.fecha)
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         for e in oportunidades:
-                dias_total.append(e.fecha)                  
-       
+                dias_total.append(e.fecha.strftime("%d/%m/%Y"))
 
         #print("list original", dias_total)
 
@@ -3296,7 +3291,7 @@ def graficosFin(request, id):
 
         for d in diccionario:
                 for e in entradas:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 diccionario[d] = diccionario[d] +1
                                 print(diccionario[d])
 
@@ -3316,7 +3311,7 @@ def graficosFin(request, id):
 
         for d in dicc_salidas:
                 for e in salidas:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 dicc_salidas[d] = dicc_salidas[d] +1
                                 
 
@@ -3334,7 +3329,7 @@ def graficosFin(request, id):
 
         for d in dicc_oportunidades:
                 for e in oportunidades:
-                        if d == e.fecha:
+                        if d == e.fecha.strftime("%d/%m/%Y"):
                                 dicc_oportunidades[d] = dicc_oportunidades[d] +1
                                 
 
