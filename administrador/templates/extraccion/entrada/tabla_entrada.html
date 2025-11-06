@@ -17,31 +17,44 @@
             </tr>
         </thead>
         <tbody>
-            
-            {% for p in entradas  %}
-            
-                {% for e  in empresaArea  %}
-            
-                        {% if p.usuario == e.usuario and p.etapa.nombre == "Extraccion materia prima" %}
-            
-                            <tr>
-                                <td>{{ e.id_area.id_empresa }}</td>
-                                <td>{{ e.id_area.nombre }}</td>
-                                <td>{{ p.usuario}}</td>
-                                <td>{{ p.nombre}}</td>
-                                <td>{{ p.fecha }}</td>
-                                <td>{{ p.etapa }}</td>
-                            </tr>
-                        {% endif %}
-                            
-                    {% endfor %}
-            
-               {% endfor %}               
-            
+
+            {% for p in entradas %}
+
+            {% for e in empresaArea %}
+
+            {% if p.usuario == e.usuario and p.etapa.nombre == "Extraccion materia prima" %}
+
+            <tr>
+                <td>{{ e.id_area.id_empresa }}</td>
+                <td>{{ e.id_area.nombre }}</td>
+                <td>{{ p.usuario}}</td>
+                <td>{{ p.nombre}}</td>
+                <td>{{ p.fecha }}</td>
+                <td>{{ p.etapa }}</td>
+            </tr>
+            {% endif %}
+
+            {% endfor %}
+
+            {% endfor %}
+
         </tbody>
     </table>
+
+
     <a href="{% url 'reporte_entradas' %}">Exportar a Excel </a>
+
+    {% if nube_url %}
+    <div style="text-align:center; margin-top:30px;">
+        <h4>Nube de palabras generada desde las notas</h4>
+        <img src="{{ nube_url }}" alt="Nube de palabras"
+            style="max-width:90%; border:1px solid #ccc; border-radius:8px;">
+    </div>
+    {% else %}
+    <p style="text-align:center; color:gray;">No hay datos suficientes para generar la nube de palabras.</p>
+    {% endif %}
 </div>
+
 <script>
     document.getElementById("entrada").className = "btn btn-success";
 </script>
