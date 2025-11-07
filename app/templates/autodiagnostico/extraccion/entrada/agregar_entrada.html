@@ -1,8 +1,8 @@
 {% extends 'autodiagnostico/extraccion/home_extraccion.html' %}
 {% load static %}
-{% block titulo %}Odyssey | Home{% endblock %}
 {% load crispy_forms_tags %}
 
+{% block titulo %}Odyssey | Home{% endblock %}
 
 {% block extraccion %}
 <div class="container">
@@ -18,52 +18,62 @@
     <form action="" method="post">
         <h4>Ingresa una entrada</h4>
         {% csrf_token %}
-        {{form | crispy}}
-
+        {{ form|crispy }}
         <div>
-
-            <input type="submit" class="btn btn-primary" value="ingresar">
+            <input type="submit" class="btn btn-primary" value="Ingresar">
         </div>
     </form>
 </div>
+
 <br>
+
 <h4>Tus entradas</h4>
 
 <div class="row row-cols-1 row-cols-md-3 g-4">
     {% for p in entradas %}
-
     {% if p.etapa.nombre == "Extraccion materia prima" %}
-
     <div class="col">
-        <div class="card text-bg-warning">
+        <div class="card text-bg-warning shadow-sm">
             <div class="card-body">
-                <h5 class="card-title">{{p.etapa}}</h5>
-                <p class="card-text">{{p.nombre}}</p>
+                <h5 class="card-title">{{ p.etapa }}</h5>
+                <p class="card-text">{{ p.nombre }}</p>
                 <form action="{% url 'eliminar_entrada_extraccion' p.id_entrada %}" method="post"
                     style="margin-top:10px;">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger btn-sm">
-                        Eliminar
-                    </button>
+                    <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
                 </form>
             </div>
         </div>
     </div>
-
     {% endif %}
-
+    {% empty %}
+    <p class="text-muted">Aún no tienes entradas registradas.</p>
     {% endfor %}
 </div>
+
+<hr class="my-4">
+
+<!-- SECCIÓN NUBE DE PALABRAS -->
+{% if nube_base64 %}
+<div class="mt-5 text-center">
+    <h4>Nube de palabras de tus entradas</h4>
+    <img src="data:image/png;base64,{{ nube_base64 }}" class="img-fluid rounded shadow" alt="Nube de palabras"
+        style="max-width: 800px;">
+</div>
+{% else %}
+<div class="mt-5 text-center text-muted">
+    <p>No hay suficientes entradas para generar la nube de palabras.</p>
+</div>
+{% endif %}
+
+<hr>
 
 <div>
-
-
-    {% for u in areaTrabajador %}
-    <h1>{{ u.id_area }}</h1>
-
+    {% for u in RegistroTrabajador %}
+    <h6>Área ID: {{ u.id_area }}</h6>
     {% endfor %}
-
 </div>
+
 <script>
     document.getElementById("entrada").className = "btn btn-success";
 </script>

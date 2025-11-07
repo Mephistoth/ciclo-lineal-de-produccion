@@ -5,7 +5,11 @@ from .models import AreaEmpresa, Entrada, Etapa, RegistroTrabajador, Salida, Opo
 from django.contrib import messages
 from .forms import EntradaForm, SalidaForm, OportunidadForm
 from user.models import Usuario
-
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+from django.http import HttpResponse
+from io import BytesIO
+import base64
 
 # Create your views here.
 def home(request):
@@ -81,40 +85,49 @@ def extraccionMateriaPrima(request):
 def agregarEntradaExtraccion(request):
     if request.user.is_authenticated:
         registros = RegistroTrabajador.objects.filter(usuario=request.user)
-        etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(nombre="Extraccion materia prima")
-        entradas = Entrada.objects.filter(usuario=request.user)
-        areaTrabajador = RegistroTrabajador.objects.values_list("id_area", flat=True).filter(usuario = request.user)
-     
-        # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
-        print("La id de la etapa es!!!!!!!!: ", etapa)
-        print("La id del area es!!!!!!!!: ", areaTrabajador)
+        etapa = Etapa.objects.filter(nombre="Extraccion materia prima").first()
+        areaTrabajador = RegistroTrabajador.objects.filter(usuario=request.user).values_list("id_area", flat=True).first()
 
-        # print("La id de la empresa es!!!!!!!!: ", empresa)
+        entradas = Entrada.objects.filter(usuario=request.user, etapa=etapa)
+
         data = {
-
             'form': EntradaForm(),
             'registros': registros,
             'entradas': entradas,
-            'areaTrabajador': areaTrabajador
-
+            'areaTrabajador': areaTrabajador,
         }
-        print(f"la id del usuario es!!!!!!!!:", request.user.id)
 
+        # ======== AGREGAR ENTRADA ========
         if request.method == 'POST':
             formulario = EntradaForm(data=request.POST, files=request.FILES)
             if formulario.is_valid():
                 post = formulario.save(commit=False)
-                post.nombre = request.POST["nombre"]
-                post.usuario_id = request.user.id
-                post.etapa_id = etapa
+                post.usuario = request.user
+                post.etapa = etapa
                 post.id_area_id = areaTrabajador
-                formulario.save()
-                messages.success(request, "Entrada Registrada con exito")
+                post.save()
+                messages.success(request, "Entrada registrada con éxito.")
+                return redirect('agregar_entrada_extraccion')
             else:
                 data["form"] = formulario
-        return render(request,'autodiagnostico/extraccion/entrada/agregar_entrada.html', data)
+
+        # ======== GENERAR NUBE DE PALABRAS ========
+        textos = " ".join(entradas.values_list("nombre", flat=True))
+        nube_base64 = None
+
+        if textos.strip():
+            wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+            buffer = BytesIO()
+            wc.to_image().save(buffer, format='PNG')
+            nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+        data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
+
+        return render(request, 'autodiagnostico/extraccion/entrada/agregar_entrada.html', data)
+
     else:
         return render(request, 'autodiagnostico/extraccion/entrada/agregar_entrada.html')
+
 
 
 def eliminarEntradaExtraccion(request, id):
@@ -851,3 +864,26 @@ def eliminarOportunidadFinVida(request, id):
     oportunidad.delete()
     messages.success(request, "Oportunidad eliminada correctamente.")
     return redirect('agregar_oportunidad_fin_vida')
+
+
+def generar_nube_extraccion(request):
+    # Filtrar etapa específica 
+    try: 
+        id_etapa = Etapa.objects.get(nombre="Extraccion materia prima")
+    except Etapa.DoesNotExist:
+        return HttpResponse("No existe la etapa 'Extraccion materia prima' en la base de datos.")
+
+    # Filtrar todas las entradas relacionadas con esa etapa
+    textos = " ".join(Entrada.objects.filter(etapa_id=id_etapa).values_list('nombre', flat=True))
+
+    if not textos.strip():
+        return HttpResponse("No hay entradas disponibles para generar la nube de palabras.")
+
+    # Generar la nube de palabras
+    nube = WordCloud(width=800, height=400, background_color='white').generate(textos)
+
+    #convertir la imagen a un objeto HttpResponse
+    buffer = BytesIO()
+    nube.to_image().save(buffer, format="PNG")
+    buffer.seek(0)
+    return HttpResponse(buffer, content_type="image/png")

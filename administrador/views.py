@@ -1,5 +1,3 @@
-import os
-import re
 from ast import Return
 from datetime import datetime
 from pipes import Template
@@ -14,11 +12,11 @@ from django.views.generic import TemplateView
 from openpyxl import Workbook
 from django.http.response import HttpResponse
 from .models import LogTelegram
-from wordcloud import WordCloud, STOPWORDS
-import matplotlib.pyplot as plt 
 from django.conf import settings
 from collections import Counter
-
+from wordcloud import WordCloud
+from io import BytesIO
+import base64
 
 
 
@@ -64,8 +62,8 @@ def tablasExtraccion(request,id):
                 #empresa = Empresa.objects.get(id)
                 empresaArea = RegistroTrabajador.objects.all()
                 area = AreaEmpresa.objects.filter(id_empresa = id)
-                entradas = Entrada.objects.filter(etapa_id = etapa)
-
+                entradas = Entrada.objects.filter(usuario=request.user, etapa_id = etapa)
+                nube_base64 = generar_nube_palabras(entradas)
 
                 #/////////////// Levenshtein ///////////////
                 lista_u = []
@@ -103,47 +101,6 @@ def tablasExtraccion(request,id):
                 )
                 #print("variable result!!!!!!!: ",result)
 
-
-                if lista_palabras:
-
-                        def limpiar_texto(texto):
-                                texto = texto.lower()
-                                texto = re.sub(r'[^a-záéíóúüñ0-9\s]', '', texto)
-                                texto = re.sub(r'\s+', ' ', texto).strip()
-                                return texto
-                        
-                        texto = " ".join([limpiar_texto(p) for p in lista_palabras])
-
-                        stopwords = set(STOPWORDS)
-                        stopwords.update({'de', 'la', 'el', 'y', 'a', 'en', 'con', 'para', 'por', 'que', 'se',
-                                        'los', 'las', 'un', 'una', 'al', 'del', 'su', 'es', 'no', 'como',
-                                        'este', 'esta'
-                        })
-
-                        wc = WordCloud(
-                                width=800,
-                                height=400,
-                                background_color='white',
-                                stopwords=stopwords,
-                                max_words=200,
-                                collocations=False
-                        ).generate(texto)
-
-                        id_empresa = empresa.first().id_empresa if empresa.exists() else 'default'
-                        ruta_nube = os.path.join(settings.BASE_DIR, 'static', 'admin', 'img', f'nube_{id_empresa}.png')
-                        os.makedirs(os.path.dirname(ruta_nube), exist_ok=True)
-
-                        plt.figure(figsize=(8, 4))
-                        plt.imshow(wc, interpolation='bilinear')
-                        plt.axis('off')
-                        plt.tight_layout(pad=0)
-                        plt.savefig(ruta_nube, format='png', bbox_inches='tight', pad_inches=0)
-                        plt.close()
-
-                        nube_url = f'/static/admin/img/nube_{id_empresa}.png'
-                else:
-                        nube_url = None
-
                 theanswer = Entrada.objects.values('id_area').annotate(Count('id_area')).filter(etapa_id = etapa) #requiere importar from django.db.models import Count
                 #print(theanswer)
                 salidas_count = Salida.objects.values('id_area').annotate(Count('id_area')).filter(etapa_id = etapa)
@@ -151,7 +108,6 @@ def tablasExtraccion(request,id):
                 oportunidad_count = Oportunidades.objects.values('id_area').annotate(Count('id_area')).filter(etapa_id = etapa)
 
                 t = theanswer[0] if theanswer else None
-
 
                 data = {
 
@@ -166,7 +122,7 @@ def tablasExtraccion(request,id):
                 'empresas':empresas,
                 'empresa':empresa,
                 'lista_t':lista_t,
-                'nube_url': nube_url,
+                "nube_base64": nube_base64
                 }
        
                 return render(request,'empresa_1/tablas_extraccion.html', data)
@@ -4105,43 +4061,17 @@ def log_telegan(request):
         return render(request,'log_telegram/log_telegram.html', data)
 
 
-# #def generar_nube_palabras(entradas, id_empresa):
-#
-#         def limpiar_texto(texto):
-#                 if not texto:
-#                         return ""
-#                 texto = texto.lower()
-#                 texto = re.sub(r'[^a-záéíóúüñ0-9\s]', '', texto)
-#                 texto = re.sub(r'\s+', ' ', texto).strip()
-#                 return texto
-#         
-#         texto_completo = " ".join([limpiar_texto(e.nombre) for e in entradas if e.nombre])
-#
-#         if not texto_completo.strip():
-#                 return None
-#
-#
-#         stopwords = set(STOPWORDS)
-#         stopwords.update({
-#                 'de', 'la', 'el', 'y', 'a', 'en', 'con', 'para', 'por', 'que', 'se',
-#                 'los', 'las', 'un', 'una', 'al', 'del', 'su', 'es', 'no', 'como',
-#                 'este', 'esta', 'lo'
-#         })
-#
-#         wc = WordCloud(
-#                 width=800,
-#                 height=400,
-#                 background_color='white',
-#                 stopwords=stopwords,
-#                 collocations=False
-#         ).generate(texto_completo)
-#
-#
-#         ruta_carpeta = os.path.join(settings.BASE_DIR, 'static', 'admin', 'img')
-#         os.makedirs(ruta_carpeta, exist_ok=True)
-#
-#         ruta_nube = os.path.join(ruta_carpeta, f'nube_{id_empresa}.png')
-#         wc.to_file(ruta_nube)
-#
-#         return f'/static/admin/img/nube_{id_empresa}.png'
-#
+def generar_nube_palabras(entradas_queryset):
+    """
+    Genera una nube de palabras en base64 a partir de un queryset de entradas.
+    Retorna una cadena base64 lista para insertar en el HTML.
+    """
+    textos = " ".join(entradas_queryset.values_list("nombre", flat=True))
+    if not textos.strip():
+        return None
+
+    wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+    buffer = BytesIO()
+    wc.to_image().save(buffer, format='PNG')
+    nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+    return nube_base64
