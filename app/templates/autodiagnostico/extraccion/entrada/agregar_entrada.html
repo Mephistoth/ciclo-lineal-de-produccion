@@ -51,23 +51,6 @@
     {% endfor %}
 </div>
 
-<hr class="my-4">
-
-<!-- SECCIÓN NUBE DE PALABRAS -->
-{% if nube_base64 %}
-<div class="mt-5 text-center">
-    <h4>Nube de palabras de tus entradas</h4>
-    <img src="data:image/png;base64,{{ nube_base64 }}" class="img-fluid rounded shadow" alt="Nube de palabras"
-        style="max-width: 800px;">
-</div>
-{% else %}
-<div class="mt-5 text-center text-muted">
-    <p>No hay suficientes entradas para generar la nube de palabras.</p>
-</div>
-{% endif %}
-
-<hr>
-
 <div>
     {% for u in RegistroTrabajador %}
     <h6>Área ID: {{ u.id_area }}</h6>

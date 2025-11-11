@@ -45,6 +45,15 @@
     <a href="{% url 'reporte_oportunidades_Compra' %}">Exportar Excel</a>
 </div>
 
+<div class="mt-5 text-center">
+      <h3>Nube de Palabras General</h3>
+      {% if nube_base64 %}
+        <img src="data:image/png;base64,{{ nube_base64 }}" class="img-fluid rounded shadow">
+      {% else %}
+        <p class="text-muted mt-3">No hay suficientes entradas para generar una nube de palabras.</p>
+      {% endif %}
+    </div>
+    <hr class="my-4">
 <script>
     document.getElementById("oportunidad").className = "btn btn-success"
 </script>

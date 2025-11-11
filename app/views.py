@@ -111,18 +111,6 @@ def agregarEntradaExtraccion(request):
             else:
                 data["form"] = formulario
 
-        # ======== GENERAR NUBE DE PALABRAS ========
-        textos = " ".join(entradas.values_list("nombre", flat=True))
-        nube_base64 = None
-
-        if textos.strip():
-            wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
-            buffer = BytesIO()
-            wc.to_image().save(buffer, format='PNG')
-            nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
-
-        data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
-
         return render(request, 'autodiagnostico/extraccion/entrada/agregar_entrada.html', data)
 
     else:

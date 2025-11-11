@@ -23,40 +23,6 @@ import base64
 
 # Create your views here.
 
-def verEntradasAdminExtraccion(request):
-    """
-    Muestra todas las entradas y genera la nube de palabras solo si el usuario es admin (is_staff=True).
-    """
-    etapa = Etapa.objects.filter(nombre="Extraccion materia prima").first()
-
-    if not etapa:
-        messages.warning(request, "No existe la etapa 'Extracción materia prima'.")
-        return render(request, "")
-
-    # Variables iniciales
-    entradas = []
-    nube_base64 = None
-
-    # Solo si el usuario es staff se obtienen las entradas
-    if request.user.is_staff:
-        entradas = Entrada.objects.filter(etapa=etapa).select_related("usuario", "id_area")
-
-        textos = " ".join(entradas.values_list("nombre", flat=True))
-        if textos.strip():
-            wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
-            buffer = BytesIO()
-            wc.to_image().save(buffer, format='PNG')
-            nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
-    else:
-        messages.info(request, "Solo los usuarios administradores pueden ver las entradas globales.")
-
-    context = {
-        "entradas": entradas,
-        "nube_base64": nube_base64,
-    }
-
-    return render(request, "", context)
-
 def homeAdmin(request):
     registros = RegistroTrabajador.objects.filter(usuario=request.user)
     empresas = Empresa.objects.all()
@@ -112,17 +78,6 @@ def tablasExtraccion(request,id):
                                 etapa_id=etapa
                         )
 
-                print(f"DEBUGGING COUNT: Se encontraron {entradas.count()} entradas después del filtro.")
-
-
-                        
-                nube_base64 = generar_nube_palabras(entradas)
-
-
-                if nube_base64:
-                        print(f"DEBUG: Nube generada exitosamente. Longitud: {len(nube_base64)}")
-                else:
-                        print(f"DEBUG: NO se pudo generar la nube de palabras (nube_base64 es None/vacío).")
 
                 #/////////////// Levenshtein ///////////////
                 lista_u = []
@@ -181,7 +136,6 @@ def tablasExtraccion(request,id):
                 'empresas':empresas,
                 'empresa':empresa,
                 'lista_t':lista_t,
-                "nube_base64": nube_base64
                 }
        
                 return render(request,'empresa_1/tablas_extraccion.html', data)
@@ -2000,6 +1954,18 @@ def entradasExtraccion(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'extraccion/entrada/tabla_entrada.html', data)
         else:
@@ -2024,6 +1990,18 @@ def SalidasExtraccion(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'extraccion/salida/tabla_salida.html', data)
         else:
@@ -2049,6 +2027,18 @@ def OportunidadExtraccion(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'extraccion/oportunidad/tabla_oportunidad.html', data)
         else:
@@ -2077,6 +2067,18 @@ def EntradaDiseño(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'diseñoProduccion/entrada/tabla_entrada.html', data)
         else:
@@ -2101,6 +2103,18 @@ def salidaDiseño(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'diseñoProduccion/salida/tabla_salida.html', data)
         else:
@@ -2125,6 +2139,18 @@ def oportunidadDiseño(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'diseñoProduccion/oportunidad/tabla_oportunidad.html', data)
         else:
@@ -2153,6 +2179,18 @@ def EntradaLogistica(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'logistica/entrada/tabla_entrada.html', data)
         else:
@@ -2178,6 +2216,18 @@ def salidaLogistica(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'logistica/salida/tabla_salida.html', data)
         else:
@@ -2203,6 +2253,18 @@ def oportunidadLogistica(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'logistica/oportunidad/tabla_oportunidad.html', data)
         else:
@@ -2231,6 +2293,18 @@ def entradaCompra(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'compra/entrada/tabla_entrada.html', data)
         else:
@@ -2255,6 +2329,18 @@ def salidaCompra(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'compra/salida/tabla_salida.html', data)
         else:
@@ -2280,6 +2366,18 @@ def oportunidadesCompra(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'compra/oportunidad/tabla_oportunidad.html', data)
         else:
@@ -2306,6 +2404,18 @@ def entradaUsoConsumo(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'usoConsumo/entrada/tabla_entrada.html', data)
         else:
@@ -2331,6 +2441,18 @@ def salidaUsoConsumo(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'usoConsumo/salida/tabla_salida.html', data)
         else:
@@ -2356,6 +2478,18 @@ def oportunidadUsoConsumo(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'usoConsumo/oportunidad/tabla_oportunidad.html', data)
         else:
@@ -2383,6 +2517,18 @@ def entradaFin(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'finVida/entrada/tabla_entrada.html', data)
         else:
@@ -2407,6 +2553,18 @@ def salidaFin(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'finVida/salida/tabla_salida.html', data)
         else:
@@ -2431,6 +2589,18 @@ def oportunidadFin(request):
                 'empresaArea':empresaArea
 
                 }
+
+                # ======== GENERAR NUBE DE PALABRAS ========
+                textos = " ".join(entradas.values_list("nombre", flat=True))
+                nube_base64 = None
+
+                if textos.strip():
+                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+                        buffer = BytesIO()
+                        wc.to_image().save(buffer, format='PNG')
+                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
        
                 return render(request,'finVida/oportunidad/tabla_oportunidad.html', data)
         else:
