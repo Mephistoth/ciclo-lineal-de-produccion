@@ -15,12 +15,47 @@ from .models import LogTelegram
 from django.conf import settings
 from collections import Counter
 from wordcloud import WordCloud
+from wordcloud import STOPWORDS
 from io import BytesIO
 import base64
 
 
 
 # Create your views here.
+
+def verEntradasAdminExtraccion(request):
+    """
+    Muestra todas las entradas y genera la nube de palabras solo si el usuario es admin (is_staff=True).
+    """
+    etapa = Etapa.objects.filter(nombre="Extraccion materia prima").first()
+
+    if not etapa:
+        messages.warning(request, "No existe la etapa 'Extracción materia prima'.")
+        return render(request, "")
+
+    # Variables iniciales
+    entradas = []
+    nube_base64 = None
+
+    # Solo si el usuario es staff se obtienen las entradas
+    if request.user.is_staff:
+        entradas = Entrada.objects.filter(etapa=etapa).select_related("usuario", "id_area")
+
+        textos = " ".join(entradas.values_list("nombre", flat=True))
+        if textos.strip():
+            wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+            buffer = BytesIO()
+            wc.to_image().save(buffer, format='PNG')
+            nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+    else:
+        messages.info(request, "Solo los usuarios administradores pueden ver las entradas globales.")
+
+    context = {
+        "entradas": entradas,
+        "nube_base64": nube_base64,
+    }
+
+    return render(request, "", context)
 
 def homeAdmin(request):
     registros = RegistroTrabajador.objects.filter(usuario=request.user)
@@ -53,6 +88,8 @@ def home_empresa(request, id):
 
 def tablasExtraccion(request,id):
         if request.user.is_authenticated:
+
+
                 empresas = Empresa.objects.all()
                 empresa = Empresa.objects.filter(id_empresa = id)
 
@@ -62,8 +99,30 @@ def tablasExtraccion(request,id):
                 #empresa = Empresa.objects.get(id)
                 empresaArea = RegistroTrabajador.objects.all()
                 area = AreaEmpresa.objects.filter(id_empresa = id)
-                entradas = Entrada.objects.filter(usuario=request.user, etapa_id = etapa)
+
+                if request.user.is_staff:
+                        entradas = Entrada.objects.filter(
+                                etapa_id=etapa,
+                                id_area__id_empresa=id  # filtra por la empresa seleccionada
+                        )
+                else:
+                        # Si no es admin, que solo vea sus propias entradas
+                        entradas = Entrada.objects.filter(
+                                usuario=request.user,
+                                etapa_id=etapa
+                        )
+
+                print(f"DEBUGGING COUNT: Se encontraron {entradas.count()} entradas después del filtro.")
+
+
+                        
                 nube_base64 = generar_nube_palabras(entradas)
+
+
+                if nube_base64:
+                        print(f"DEBUG: Nube generada exitosamente. Longitud: {len(nube_base64)}")
+                else:
+                        print(f"DEBUG: NO se pudo generar la nube de palabras (nube_base64 es None/vacío).")
 
                 #/////////////// Levenshtein ///////////////
                 lista_u = []
@@ -4059,19 +4118,3 @@ def log_telegan(request):
                 'registros': registros
         }
         return render(request,'log_telegram/log_telegram.html', data)
-
-
-def generar_nube_palabras(entradas_queryset):
-    """
-    Genera una nube de palabras en base64 a partir de un queryset de entradas.
-    Retorna una cadena base64 lista para insertar en el HTML.
-    """
-    textos = " ".join(entradas_queryset.values_list("nombre", flat=True))
-    if not textos.strip():
-        return None
-
-    wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
-    buffer = BytesIO()
-    wc.to_image().save(buffer, format='PNG')
-    nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
-    return nube_base64

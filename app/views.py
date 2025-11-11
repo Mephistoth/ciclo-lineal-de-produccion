@@ -864,26 +864,3 @@ def eliminarOportunidadFinVida(request, id):
     oportunidad.delete()
     messages.success(request, "Oportunidad eliminada correctamente.")
     return redirect('agregar_oportunidad_fin_vida')
-
-
-def generar_nube_extraccion(request):
-    # Filtrar etapa específica 
-    try: 
-        id_etapa = Etapa.objects.get(nombre="Extraccion materia prima")
-    except Etapa.DoesNotExist:
-        return HttpResponse("No existe la etapa 'Extraccion materia prima' en la base de datos.")
-
-    # Filtrar todas las entradas relacionadas con esa etapa
-    textos = " ".join(Entrada.objects.filter(etapa_id=id_etapa).values_list('nombre', flat=True))
-
-    if not textos.strip():
-        return HttpResponse("No hay entradas disponibles para generar la nube de palabras.")
-
-    # Generar la nube de palabras
-    nube = WordCloud(width=800, height=400, background_color='white').generate(textos)
-
-    #convertir la imagen a un objeto HttpResponse
-    buffer = BytesIO()
-    nube.to_image().save(buffer, format="PNG")
-    buffer.seek(0)
-    return HttpResponse(buffer, content_type="image/png")
