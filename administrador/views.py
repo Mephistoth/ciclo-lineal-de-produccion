@@ -1,3 +1,7 @@
+import collections
+import numpy as np
+import os
+import base64
 from ast import Return
 from datetime import datetime
 from pipes import Template
@@ -5,8 +9,6 @@ from urllib import request
 from django.shortcuts import render
 from app.models import RegistroTrabajador, Etapa, Entrada, Salida, Oportunidades, Empresa, AreaEmpresa
 from django.db.models import Count
-import collections
-import numpy as np
 from Levenshtein import distance, editops, apply_edit, jaro
 from django.views.generic import TemplateView
 from openpyxl import Workbook
@@ -17,7 +19,8 @@ from collections import Counter
 from wordcloud import WordCloud
 from wordcloud import STOPWORDS
 from io import BytesIO
-import base64
+from openai import OpenAI
+from dotenv import load_dotenv
 
 
 
@@ -4343,3 +4346,42 @@ def log_telegan(request):
                 'registros': registros
         }
         return render(request,'log_telegram/log_telegram.html', data)
+
+load_dotenv()
+
+def ia_semantica(request):
+    resumen = None
+
+    if request.method == 'POST':
+        texto = request.POST.get('texto', '').strip()
+        archivo = request.FILES.get('archivo')
+
+        # Si se sube un archivo, leer su contenido
+        if archivo:
+            if archivo.name.endswith('.txt'):
+                texto = archivo.read().decode('utf-8')
+            elif archivo.name.endswith('.docx'):
+                from docx import Document
+                doc = Document(archivo)
+                texto = "\n".join([p.text for p in doc.paragraphs])
+            else:
+                resumen = "Solo se aceptan archivos .txt o .docx"
+                return render(request, 'ia_semantica/ia_semantica.html', {'resumen': resumen})
+
+        if texto:
+            client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            prompt = f"Resume el siguiente texto en un máximo de 200 palabras, manteniendo el tono formal y las ideas principales:\n\n{texto}"
+
+            respuesta = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "Eres un asistente experto en redacción de resúmenes en español."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7,
+                max_tokens=500
+            )
+
+            resumen = respuesta.choices[0].message.content.strip()
+
+    return render(request, 'ia_semantica/ia_semantica.html', {'resumen': resumen})
