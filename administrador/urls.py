@@ -8,7 +8,7 @@ from .views import homeAdmin, home_empresa, tablasExtraccion, entradasExtraccion
                 frecuenciaFin, homeGraficos, etapaGraficos, areasExtraccion, graficosExtraccion, areasDiseño, graficosDiseño, areasLogistica, graficosLogistica, areasCompra, graficosCompra, \
                 areasUso, graficosUso, areasFin, graficosFin, ReporteExcel, ReporteExcelSalida, ReporteExcelOportunidades, ReporteExcelEntradaDiseño, ReporteExcelSalidaDiseño, ReporteExcelOportunidadDiseño, \
                 ReporteExcelEntradaLogistica, ReporteExcelSalidaLogistica, ReporteExcelOportunidadLogistica, ReporteExcelEntradaCompra, ReporteExcelSalidaCompra, ReporteExcelOportunidadCompra, \
-                ReporteExcelEntradaUso, ReporteExcelSalidaUso, ReporteExcelOportunidadUso, ReporteExcelEntradaFin, ReporteExcelSalidaFin, ReporteExcelOportunidadFin, log_telegan, ia_semantica                
+                ReporteExcelEntradaUso, ReporteExcelSalidaUso, ReporteExcelOportunidadUso, ReporteExcelEntradaFin, ReporteExcelSalidaFin, ReporteExcelOportunidadFin, log_telegan, ia_semantica, descargar_resumen                
 
 urlpatterns = [
     path('home_admin', homeAdmin, name='home_admin'),
@@ -117,5 +117,6 @@ urlpatterns = [
 
     #ia semantica
     path('ia_semantica', ia_semantica, name='ia_semantica'),
+    path('descargar_resumen', descargar_resumen, name='descargar_resumen'),
 
 ]

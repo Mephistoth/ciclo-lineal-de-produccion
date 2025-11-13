@@ -2,6 +2,8 @@ import collections
 import numpy as np
 import os
 import base64
+import docx
+import fitz
 from ast import Return
 from datetime import datetime
 from pipes import Template
@@ -4349,7 +4351,39 @@ def log_telegan(request):
 
 load_dotenv()
 
+def leer_archivo(archivo):
+    """
+    Lee el contenido de un archivo subido (.txt, .docx, .pdf)
+    y devuelve su texto como string.
+    """
+    extension = archivo.name.split('.')[-1].lower()
+
+    try:
+        if extension == "txt":
+            return archivo.read().decode("utf-8", errors="ignore")
+
+        elif extension == "docx":
+            doc = docx.Document(archivo)
+            return "\n".join([p.text for p in doc.paragraphs])
+
+        elif extension == "pdf":
+            texto = ""
+            with fitz.open(stream=archivo.read(), filetype="pdf") as pdf:
+                for pagina in pdf:
+                    texto += pagina.get_text()
+            return texto
+
+    except Exception as e:
+        return f"Error al leer el archivo: {str(e)}"
+
+    return ""
+
 def ia_semantica(request):
+    """
+    Vista principal del módulo de IA Semántica:
+    - Permite subir un archivo o escribir texto libre
+    - Genera un resumen de máximo 200 palabras usando OpenAI
+    """
     resumen = None
 
     if request.method == 'POST':
@@ -4358,30 +4392,65 @@ def ia_semantica(request):
 
         # Si se sube un archivo, leer su contenido
         if archivo:
-            if archivo.name.endswith('.txt'):
-                texto = archivo.read().decode('utf-8')
-            elif archivo.name.endswith('.docx'):
-                from docx import Document
-                doc = Document(archivo)
-                texto = "\n".join([p.text for p in doc.paragraphs])
-            else:
-                resumen = "Solo se aceptan archivos .txt o .docx"
+            texto = leer_archivo(archivo)
+
+            # Si el lector devolvió un mensaje de error o texto vacío
+            if not texto or texto.startswith("Error"):
+                resumen = texto if texto else "No se pudo leer el archivo o está vacío."
                 return render(request, 'ia_semantica/ia_semantica.html', {'resumen': resumen})
 
+        # Si hay texto, se envía a la API
         if texto:
-            client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-            prompt = f"Resume el siguiente texto en un máximo de 200 palabras, manteniendo el tono formal y las ideas principales:\n\n{texto}"
+            try:
+                api_key = os.getenv("OPENAI_API_KEY")
+                if not api_key:
+                    resumen = "Error: No se encontró la clave OPENAI_API_KEY en el entorno."
+                else:
+                    client = OpenAI(api_key=api_key)
 
-            respuesta = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "Eres un asistente experto en redacción de resúmenes en español."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.7,
-                max_tokens=500
-            )
+                    prompt = (
+                        "Resume el siguiente texto en un máximo de 200 palabras, "
+                        "manteniendo el tono formal y las ideas principales:\n\n" + texto
+                    )
 
-            resumen = respuesta.choices[0].message.content.strip()
+                    respuesta = client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[
+                            {"role": "system", "content": "Eres un asistente experto en redacción de resúmenes en español."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        temperature=0.7,
+                        max_tokens=500
+                    )
+
+                    resumen = respuesta.choices[0].message.content.strip()
+
+
+            except Exception as e:
+                resumen = f"Error al procesar con la IA: {str(e)}"
+
+        else:
+            resumen = "Por favor, escribe un texto o sube un archivo antes de generar el resumen."
 
     return render(request, 'ia_semantica/ia_semantica.html', {'resumen': resumen})
+
+
+# ======= Descargar resumen =======
+def descargar_resumen(request):
+    resumen = request.GET.get('resumen', '')
+
+    if not resumen.strip():
+        return HttpResponse("No hay resumen disponible para descargar.", content_type="text/plain")
+
+    # Crear el documento Word
+    buffer = BytesIO()
+    doc = docx.Document()
+    doc.add_heading("Resumen (200 palabras)", level=1)
+    doc.add_paragraph(resumen)
+    doc.save(buffer)
+    buffer.seek(0)
+
+    # Preparar la respuesta HTTP para descarga
+    response = HttpResponse(buffer.getvalue(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    response['Content-Disposition'] = 'attachment; filename="resumen_200_palabras.docx"'
+    return response
