@@ -1,7 +1,7 @@
 from email import message
 from time import process_time_ns
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import AreaEmpresa, Entrada, Etapa, RegistroTrabajador, Salida, Oportunidades
+from .models import AreaEmpresa, Entrada, Etapa, RegistroTrabajador, Salida, Oportunidades, Empresa
 from django.contrib import messages
 from .forms import EntradaForm, SalidaForm, OportunidadForm
 from user.models import Usuario
@@ -20,20 +20,37 @@ def home(request):
     else:
         return render(request, 'home.html')
 
-
-
-
-
-
-def autoDiagnostico(request):
-    if request.user.is_authenticated:
-        registros = RegistroTrabajador.objects.filter(usuario=request.user)
-        return render(request, 'autodiagnostico/auto_diagnostico.html', {'registros': registros})
-    else:
+def autoDiagnostico(request, empresa_id=None):
+    if not request.user.is_authenticated:
         return render(request, 'autodiagnostico/auto_diagnostico.html')
+
+    empresas = Empresa.objects.all()  # para admins
+    registros = RegistroTrabajador.objects.filter(usuario=request.user)
+
+    empresa_seleccionada = None
+    if empresa_id:
+        empresa_seleccionada = Empresa.objects.get(id_empresa=empresa_id)
+
+    contexto = {
+        'registros': registros,
+        'empresas': empresas,
+        'empresa_seleccionada': empresa_seleccionada
+    }
+
+    return render(request, 'autodiagnostico/auto_diagnostico.html', contexto)
 
 
 def extraccionMateriaPrima(request):
+    empresa_id = request.GET.get("empresa")
+    empresa_seleccionada = None
+
+
+    if empresa_id:
+        try:
+            empresa_seleccionada = Empresa.objects.get(id_empresa=empresa_id)
+        except Empresa.DoesNotExist:
+            empresa_seleccionada = None
+
     if request.user.is_authenticated:
 
         registros = RegistroTrabajador.objects.filter(usuario=request.user)
@@ -77,7 +94,8 @@ def extraccionMateriaPrima(request):
                 messages.success(request, "Entrada Registrada con exito")
             else:
                 formulario = SalidaForm()
-        return render(request, 'autodiagnostico/extraccion/home_extraccion.html', {'form': formulario, 'registros': registros, 'entradas': entradas})
+        return render(request, 'autodiagnostico/extraccion/home_extraccion.html', {'form': formulario,
+         'registros': registros, 'entradas': entradas, 'empresa_id': empresa_id, 'empresa_seleccionada': empresa_seleccionada})
     else:
         return render(request, 'autodiagnostico/extraccion/home_extraccion.html')
 
@@ -207,12 +225,14 @@ def eliminarOportunidadExtraccion(request, id):
 # Diseño y produccion
 
 def diseño_Produccion(request):
+    empresa_id = request.GET.get("empresa")
     registros = RegistroTrabajador.objects.filter(usuario=request.user)
 
     data = {
 
             
             'registros': registros,
+            'empresa_id': empresa_id
             
 
     }
@@ -340,10 +360,12 @@ def eliminarOportunidadDiseño(request, id):
 # logistica
 
 def logistica(request):
+    empresa_id = request.GET.get("empresa")
     registros = RegistroTrabajador.objects.filter(usuario=request.user)
 
     data = {  
             'registros': registros, 
+            'empresa_id': empresa_id
     }
 
     return render(request,'autodiagnostico/logistica/home_logistica.html', data)
@@ -470,10 +492,12 @@ def eliminarOportunidadLogistica(request, id):
 #compra
 
 def compra(request):
+    empresa_id = request.GET.get("empresa")
     registros = RegistroTrabajador.objects.filter(usuario=request.user)
 
     data = {  
             'registros': registros, 
+            'empresa_id': empresa_id
     }
 
     return render(request,'autodiagnostico/compra/home_compra.html', data)
@@ -599,10 +623,12 @@ def eliminarOportunidadCompra(request, id):
 #Uso consumo
 
 def usoConsumo(request):
+    empresa_id = request.GET.get("empresa")
     registros = RegistroTrabajador.objects.filter(usuario=request.user)
 
     data = {  
             'registros': registros, 
+            'empresa_id': empresa_id
     }
 
     return render(request,'autodiagnostico/usoConsumo/home_usoConsumo.html', data)        
@@ -728,10 +754,12 @@ def eliminarOportunidadUso(request, id):
 # Fin de vida
 
 def finVida(request):
+    empresa_id = request.GET.get("empresa")
     registros = RegistroTrabajador.objects.filter(usuario=request.user)
 
     data = {  
             'registros': registros, 
+            'empresa_id': empresa_id
     }
 
     return render(request,'autodiagnostico/finVida/home_finVida.html', data)

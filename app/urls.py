@@ -4,6 +4,7 @@ from .views import *
 urlpatterns = [
     path('', home, name="home"),
     path('auto_diagnostico', autoDiagnostico, name="auto_diagnostico"),
+    path('auto_diagnostico/<int:empresa_id>/', autoDiagnostico, name="auto_diagnostico_empresa"),
     #etapa extraccion materia prima
     path('extraccion_materiaPrima', extraccionMateriaPrima, name="extraccion_materiaPrima"),
     path('agregar_entrada_extraccion', agregarEntradaExtraccion, name="agregar_entrada_extraccion"),
@@ -12,7 +13,7 @@ urlpatterns = [
     path('eliminar_entrada_extraccion/<int:id>/', eliminarEntradaExtraccion, name='eliminar_entrada_extraccion'),
     path('eliminar_oportunidad_extraccion/<int:id>/', eliminarOportunidadExtraccion, name='eliminar_oportunidad_extraccion'),
     path('eliminar_salida_extraccion/<int:id>/', eliminarSalidaExtraccion, name='eliminar_salida_extraccion'),
-
+    
     #etapa diseño y produccion
     path('diseño_Produccion', diseño_Produccion, name="diseño_Produccion"),
     path('agregar_entrada_diseño', agregarEntradaDiseño, name="agregar_entrada_diseño"),
@@ -57,5 +58,4 @@ urlpatterns = [
     path('eliminar_entrada_fin_vida/<int:id>/', eliminarEntradaFinVida, name='eliminar_entrada_fin_vida'),
     path('eliminar_oportunidad_fin_vida/<int:id>/', eliminarOportunidadFinVida, name='eliminar_oportunidad_fin_vida'),
     path('eliminar_salida_fin_vida/<int:id>/', eliminarSalidaFinVida, name='eliminar_salida_fin_vida'),
-
 ]
