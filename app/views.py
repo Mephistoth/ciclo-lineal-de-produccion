@@ -46,10 +46,9 @@ def extraccionMateriaPrima(request):
 
 
     if empresa_id:
-        try:
             empresa_seleccionada = Empresa.objects.get(id_empresa=empresa_id)
-        except Empresa.DoesNotExist:
-            empresa_seleccionada = None
+
+    empresas = Empresa.objects.all()
 
     if request.user.is_authenticated:
 
@@ -95,7 +94,7 @@ def extraccionMateriaPrima(request):
             else:
                 formulario = SalidaForm()
         return render(request, 'autodiagnostico/extraccion/home_extraccion.html', {'form': formulario,
-         'registros': registros, 'entradas': entradas, 'empresa_id': empresa_id, 'empresa_seleccionada': empresa_seleccionada})
+         'registros': registros, 'entradas': entradas, 'empresas': empresas, 'empresa_seleccionada': empresa_seleccionada})
     else:
         return render(request, 'autodiagnostico/extraccion/home_extraccion.html')
 
@@ -225,18 +224,26 @@ def eliminarOportunidadExtraccion(request, id):
 # Diseño y produccion
 
 def diseño_Produccion(request):
+
     empresa_id = request.GET.get("empresa")
+    empresa_seleccionada = None
+
+    if empresa_id:
+        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
+
+    empresas = Empresa.objects.all()
+
     registros = RegistroTrabajador.objects.filter(usuario=request.user)
 
     data = {
-
-            
-            'registros': registros,
-            'empresa_id': empresa_id
-            
-
+        'registros': registros,
+        'empresas': empresas,
+        'empresa_seleccionada': empresa_seleccionada,
+        'empresa_id': empresa_id,
     }
-    return render(request,'autodiagnostico/diseñoProduccion/home_diseño.html', data)
+
+    return render(request, 'autodiagnostico/diseñoProduccion/home_diseño.html', data)
+
 
 
 def agregarEntradaDiseño(request):
@@ -361,11 +368,20 @@ def eliminarOportunidadDiseño(request, id):
 
 def logistica(request):
     empresa_id = request.GET.get("empresa")
+    empresa_seleccionada = None
+
+    if empresa_id:
+        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
+
+    empresas = Empresa.objects.all()
+
     registros = RegistroTrabajador.objects.filter(usuario=request.user)
 
     data = {  
             'registros': registros, 
-            'empresa_id': empresa_id
+            'empresas': empresas,
+            'empresa_seleccionada': empresa_seleccionada,
+            'empresa_id': empresa_id,
     }
 
     return render(request,'autodiagnostico/logistica/home_logistica.html', data)
@@ -493,11 +509,20 @@ def eliminarOportunidadLogistica(request, id):
 
 def compra(request):
     empresa_id = request.GET.get("empresa")
+    empresa_seleccionada = None
+
+    if empresa_id:
+        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
+
+    empresas = Empresa.objects.all()
+
     registros = RegistroTrabajador.objects.filter(usuario=request.user)
 
     data = {  
             'registros': registros, 
-            'empresa_id': empresa_id
+            'empresas': empresas,
+            'empresa_seleccionada': empresa_seleccionada,
+            'empresa_id': empresa_id,
     }
 
     return render(request,'autodiagnostico/compra/home_compra.html', data)
@@ -624,11 +649,20 @@ def eliminarOportunidadCompra(request, id):
 
 def usoConsumo(request):
     empresa_id = request.GET.get("empresa")
+    empresa_seleccionada = None
+
+    if empresa_id:
+        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
+
+    empresas = Empresa.objects.all()
+
     registros = RegistroTrabajador.objects.filter(usuario=request.user)
 
     data = {  
             'registros': registros, 
-            'empresa_id': empresa_id
+            'empresas': empresas,
+            'empresa_seleccionada': empresa_seleccionada,
+            'empresa_id': empresa_id,
     }
 
     return render(request,'autodiagnostico/usoConsumo/home_usoConsumo.html', data)        
@@ -755,11 +789,20 @@ def eliminarOportunidadUso(request, id):
 
 def finVida(request):
     empresa_id = request.GET.get("empresa")
+    empresa_seleccionada = None
+
+    if empresa_id:
+        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
+
+    empresas = Empresa.objects.all()
+
     registros = RegistroTrabajador.objects.filter(usuario=request.user)
 
     data = {  
             'registros': registros, 
-            'empresa_id': empresa_id
+            'empresas': empresas,
+            'empresa_seleccionada': empresa_seleccionada,
+            'empresa_id': empresa_id,
     }
 
     return render(request,'autodiagnostico/finVida/home_finVida.html', data)

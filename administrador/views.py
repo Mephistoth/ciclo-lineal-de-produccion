@@ -1942,48 +1942,72 @@ def frecuenciaFin(request, id):
 
 def entradasExtraccion(request):
 
-        if request.user.is_authenticated:
+    if request.user.is_authenticated:
 
-                registros = RegistroTrabajador.objects.filter(usuario=request.user)
-                etapa = Etapa.objects.filter(nombre="Extraccion materia prima").first()
+        # =====================================================
+        # 1. RECIBIR LA EMPRESA DESDE LA URL
+        # =====================================================
+        empresa_id = request.GET.get("empresa")
+        empresa_seleccionada = None
+        empresas = Empresa.objects.all()
 
-                if etapa:
-                        entradas = Entrada.objects.filter(etapa=etapa)
-                else:
-                        entradas = Entrada.objects.none()
-                #entradas = Entrada.objects.all()
-                empresaArea = RegistroTrabajador.objects.all()
-                
-                # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
-                print(etapa)
+        if empresa_id:
+            empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
 
-                data = {
+        # =====================================================
+        # 2. DATOS GENERALES
+        # =====================================================
+        registros = RegistroTrabajador.objects.filter(usuario=request.user)
+        etapa = Etapa.objects.filter(nombre="Extraccion materia prima").first()
 
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
-
-                # ======== GENERAR NUBE DE PALABRAS ========
-                textos = " ".join(entradas.values_list("nombre", flat=True))
-                nube_base64 = None
-
-                if textos.strip():
-                        wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
-                        buffer = BytesIO()
-                        wc.to_image().save(buffer, format='PNG')
-                        nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
-
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
-       
-                return render(request,'extraccion/entrada/tabla_entrada.html', data)
+        if etapa:
+            entradas = Entrada.objects.filter(etapa=etapa)
         else:
-                return render(request, 'extraccion/entrada/tabla_entrada.html')
+            entradas = Entrada.objects.none()
+
+        empresaArea = RegistroTrabajador.objects.all()
+
+        # =====================================================
+        # 3. NUBE DE PALABRAS
+        # =====================================================
+        textos = " ".join(entradas.values_list("nombre", flat=True))
+        nube_base64 = None
+
+        if textos.strip():
+            wc = WordCloud(width=800, height=400, background_color='white').generate(textos)
+            buffer = BytesIO()
+            wc.to_image().save(buffer, format='PNG')
+            nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
+        # =====================================================
+        # 4. ENVIAR TODO AL TEMPLATE (CORREGIDO)
+        # =====================================================
+        data = {
+            'registros': registros,
+            'entradas': entradas,
+            'empresaArea': empresaArea,
+            'empresas': empresas,
+            'empresa_seleccionada': empresa_seleccionada,
+            'nube_base64': nube_base64,
+            'etapa_seleccionada': "extraccion",
+        }
+
+        return render(request, 'extraccion/entrada/tabla_entrada.html', data)
+
+    else:
+        return render(request, 'extraccion/entrada/tabla_entrada.html')
+
 
 def SalidasExtraccion(request):
 
         if request.user.is_authenticated:
+
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
 
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Extraccion materia prima").first()
@@ -1996,15 +2020,8 @@ def SalidasExtraccion(request):
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
 
-                data = {
 
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
-
-                # ======== GENERAR NUBE DE PALABRAS ========
+                 # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
                 nube_base64 = None
 
@@ -2014,7 +2031,18 @@ def SalidasExtraccion(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'empresa_seleccionada': empresa_seleccionada,
+                'nube_base64': nube_base64,
+                'etapa_seleccionada': "extraccion",
+
+                }
+
        
                 return render(request,'extraccion/salida/tabla_salida.html', data)
         else:
@@ -2024,6 +2052,13 @@ def SalidasExtraccion(request):
 def OportunidadExtraccion(request):
 
         if request.user.is_authenticated:
+
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
 
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Extraccion materia prima").first()
@@ -2036,14 +2071,6 @@ def OportunidadExtraccion(request):
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
 
-                data = {
-
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
-
                 # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
                 nube_base64 = None
@@ -2054,7 +2081,17 @@ def OportunidadExtraccion(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'empresa_seleccionada': empresa_seleccionada,
+                'nube_base64': nube_base64,
+                'etapa_seleccionada': "extraccion",
+
+                }
        
                 return render(request,'extraccion/oportunidad/tabla_oportunidad.html', data)
         else:
@@ -2068,6 +2105,14 @@ def EntradaDiseño(request):
 
         if request.user.is_authenticated:
 
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
+
+
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Diseño y produccion").first()
                 if etapa:
@@ -2079,14 +2124,6 @@ def EntradaDiseño(request):
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
 
-                data = {
-
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
-
                 # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
                 nube_base64 = None
@@ -2097,7 +2134,19 @@ def EntradaDiseño(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'nube_base64': nube_base64,
+                'empresa_seleccionada': empresa_seleccionada,
+                'etapa_seleccionada': "diseñoProduccion",
+
+
+                }
+
        
                 return render(request,'diseñoProduccion/entrada/tabla_entrada.html', data)
         else:
@@ -2106,6 +2155,13 @@ def EntradaDiseño(request):
 def salidaDiseño(request):
 
         if request.user.is_authenticated:
+
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
 
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Diseño y produccion").first()
@@ -2118,15 +2174,6 @@ def salidaDiseño(request):
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
 
-                data = {
-
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
-
-                # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
                 nube_base64 = None
 
@@ -2136,8 +2183,18 @@ def salidaDiseño(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
-       
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'empresa_seleccionada': empresa_seleccionada,
+                'nube_base64': nube_base64,
+                'etapa_seleccionada': "diseñoProduccion",
+
+                }
+
                 return render(request,'diseñoProduccion/salida/tabla_salida.html', data)
         else:
                 return render(request, 'diseñoProduccion/salida/tabla_salida.html')                              
@@ -2145,6 +2202,13 @@ def salidaDiseño(request):
 def oportunidadDiseño(request):
 
         if request.user.is_authenticated:
+
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
 
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Diseño y produccion").first()
@@ -2157,13 +2221,6 @@ def oportunidadDiseño(request):
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
 
-                data = {
-
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
 
                 # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
@@ -2175,7 +2232,17 @@ def oportunidadDiseño(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'empresa_seleccionada': empresa_seleccionada,
+                'nube_base64': nube_base64,
+                'etapa_seleccionada': "diseñoProduccion",
+
+                }
        
                 return render(request,'diseñoProduccion/oportunidad/tabla_oportunidad.html', data)
         else:
@@ -2189,6 +2256,13 @@ def EntradaLogistica(request):
 
         if request.user.is_authenticated:
 
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
+
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Logistica").first()
                 if etapa:
@@ -2200,14 +2274,6 @@ def EntradaLogistica(request):
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
 
-                data = {
-
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
-
                 # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
                 nube_base64 = None
@@ -2218,8 +2284,18 @@ def EntradaLogistica(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
-       
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'empresa_seleccionada': empresa_seleccionada,
+                'etapa_seleccionada': "logistica",
+                'nube_base64': nube_base64,
+
+                }
+
                 return render(request,'logistica/entrada/tabla_entrada.html', data)
         else:
                 return render(request, 'logistica/entrada/tabla_entrada.html')
@@ -2228,6 +2304,13 @@ def EntradaLogistica(request):
 def salidaLogistica(request):
 
         if request.user.is_authenticated:
+
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
 
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Logistica").first()
@@ -2240,14 +2323,6 @@ def salidaLogistica(request):
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
 
-                data = {
-
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
-
                 # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
                 nube_base64 = None
@@ -2258,7 +2333,17 @@ def salidaLogistica(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'empresa_seleccionada': empresa_seleccionada,
+                'etapa_seleccionada': "logistica",
+                'nube_base64': nube_base64,
+
+                }
        
                 return render(request,'logistica/salida/tabla_salida.html', data)
         else:
@@ -2269,6 +2354,13 @@ def oportunidadLogistica(request):
 
         if request.user.is_authenticated:
 
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
+
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Logistica").first()
                 if etapa:
@@ -2280,14 +2372,6 @@ def oportunidadLogistica(request):
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
 
-                data = {
-
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
-
                 # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
                 nube_base64 = None
@@ -2298,7 +2382,17 @@ def oportunidadLogistica(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'empresa_seleccionada': empresa_seleccionada,
+                'etapa_seleccionada': "logistica",
+                'nube_base64': nube_base64,
+
+                }
        
                 return render(request,'logistica/oportunidad/tabla_oportunidad.html', data)
         else:
@@ -2306,11 +2400,16 @@ def oportunidadLogistica(request):
 
 
 # compra
-
-
 def entradaCompra(request):
 
         if request.user.is_authenticated:
+
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
 
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Compra").first()
@@ -2323,14 +2422,6 @@ def entradaCompra(request):
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
 
-                data = {
-
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
-
                 # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
                 nube_base64 = None
@@ -2341,7 +2432,17 @@ def entradaCompra(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'empresa_seleccionada': empresa_seleccionada,
+                'etapa_seleccionada': "compra",
+                'nube_base64': nube_base64,
+
+                }
        
                 return render(request,'compra/entrada/tabla_entrada.html', data)
         else:
@@ -2350,6 +2451,13 @@ def entradaCompra(request):
 def salidaCompra(request):
 
         if request.user.is_authenticated:
+
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
 
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Compra").first()
@@ -2362,14 +2470,6 @@ def salidaCompra(request):
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
 
-                data = {
-
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
-
                 # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
                 nube_base64 = None
@@ -2380,8 +2480,18 @@ def salidaCompra(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
-       
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'empresa_seleccionada': empresa_seleccionada,
+                'etapa_seleccionada': "compra",
+                'nube_base64': nube_base64,
+
+                }
+
                 return render(request,'compra/salida/tabla_salida.html', data)
         else:
                 return render(request, 'compra/salida/tabla_salida.html') 
@@ -2390,6 +2500,13 @@ def salidaCompra(request):
 def oportunidadesCompra(request):
 
         if request.user.is_authenticated:
+
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
 
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Compra").first()
@@ -2402,14 +2519,6 @@ def oportunidadesCompra(request):
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
 
-                data = {
-
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
-
                 # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
                 nube_base64 = None
@@ -2420,7 +2529,17 @@ def oportunidadesCompra(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'empresa_seleccionada': empresa_seleccionada,
+                'etapa_seleccionada': "compra",
+                'nube_base64': nube_base64,
+
+                }
        
                 return render(request,'compra/oportunidad/tabla_oportunidad.html', data)
         else:
@@ -2432,6 +2551,13 @@ def entradaUsoConsumo(request):
 
         if request.user.is_authenticated:
 
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
+
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Uso consumo").first()
                 if etapa:
@@ -2443,14 +2569,6 @@ def entradaUsoConsumo(request):
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
 
-                data = {
-
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
-
                 # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
                 nube_base64 = None
@@ -2461,7 +2579,17 @@ def entradaUsoConsumo(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'empresa_seleccionada': empresa_seleccionada,
+                'etapa_seleccionada': "usoConsumo",
+                'nube_base64': nube_base64,
+
+                }
        
                 return render(request,'usoConsumo/entrada/tabla_entrada.html', data)
         else:
@@ -2471,6 +2599,13 @@ def entradaUsoConsumo(request):
 def salidaUsoConsumo(request):
 
         if request.user.is_authenticated:
+
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
 
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Uso consumo").first()
@@ -2483,14 +2618,6 @@ def salidaUsoConsumo(request):
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
 
-                data = {
-
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
-
                 # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
                 nube_base64 = None
@@ -2501,7 +2628,17 @@ def salidaUsoConsumo(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'empresa_seleccionada': empresa_seleccionada,
+                'etapa_seleccionada': "usoConsumo",
+                'nube_base64': nube_base64,
+
+                }
        
                 return render(request,'usoConsumo/salida/tabla_salida.html', data)
         else:
@@ -2511,6 +2648,13 @@ def salidaUsoConsumo(request):
 def oportunidadUsoConsumo(request):
 
         if request.user.is_authenticated:
+
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
 
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Uso consumo").first()
@@ -2523,14 +2667,6 @@ def oportunidadUsoConsumo(request):
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
 
-                data = {
-
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
-
                 # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
                 nube_base64 = None
@@ -2541,7 +2677,17 @@ def oportunidadUsoConsumo(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'empresa_seleccionada': empresa_seleccionada,
+                'etapa_seleccionada': "usoConsumo",
+                'nube_base64': nube_base64,
+
+                }
        
                 return render(request,'usoConsumo/oportunidad/tabla_oportunidad.html', data)
         else:
@@ -2554,6 +2700,13 @@ def entradaFin(request):
 
         if request.user.is_authenticated:
 
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
+
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Fin de vida").first()
                 if etapa:
@@ -2565,14 +2718,6 @@ def entradaFin(request):
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
 
-                data = {
-
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
-
                 # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
                 nube_base64 = None
@@ -2583,7 +2728,18 @@ def entradaFin(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
+
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'empresa_seleccionada': empresa_seleccionada,
+                'etapa_seleccionada': "finVida",
+                'nube_base64': nube_base64,
+
+                }
        
                 return render(request,'finVida/entrada/tabla_entrada.html', data)
         else:
@@ -2592,6 +2748,13 @@ def entradaFin(request):
 def salidaFin(request):
 
         if request.user.is_authenticated:
+
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
 
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Fin de vida").first()
@@ -2604,14 +2767,6 @@ def salidaFin(request):
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
 
-                data = {
-
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
-
                 # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
                 nube_base64 = None
@@ -2622,7 +2777,17 @@ def salidaFin(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'empresa_seleccionada': empresa_seleccionada,
+                'etapa_seleccionada': "finVida",
+                'nube_base64': nube_base64,
+
+                }
        
                 return render(request,'finVida/salida/tabla_salida.html', data)
         else:
@@ -2631,6 +2796,13 @@ def salidaFin(request):
 def oportunidadFin(request):
 
         if request.user.is_authenticated:
+
+                empresa_id = request.GET.get("empresa")
+                empresa_seleccionada = None
+                empresas = Empresa.objects.all()
+
+                if empresa_id:
+                        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
 
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
                 etapa = Etapa.objects.filter(nombre="Fin de vida").first()
@@ -2642,13 +2814,6 @@ def oportunidadFin(request):
                 
                 # etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(activo=True)
                 print(etapa)
-                data = {
-
-                'registros': registros,
-                'entradas': entradas,
-                'empresaArea':empresaArea
-
-                }
 
                 # ======== GENERAR NUBE DE PALABRAS ========
                 textos = " ".join(entradas.values_list("nombre", flat=True))
@@ -2660,7 +2825,17 @@ def oportunidadFin(request):
                         wc.to_image().save(buffer, format='PNG')
                         nube_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-                data['nube_base64'] = nube_base64  # Enviamos la nube al HTML
+                data = {
+
+                'registros': registros,
+                'entradas': entradas,
+                'empresaArea':empresaArea,
+                'empresas': empresas,
+                'empresa_seleccionada': empresa_seleccionada,
+                'etapa_seleccionada': "finVida",
+                'nube_base64': nube_base64,
+
+                }
        
                 return render(request,'finVida/oportunidad/tabla_oportunidad.html', data)
         else:

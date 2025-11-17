@@ -2,21 +2,21 @@
 {% load static %}
 {% block titulo %}Odyssey | Home{% endblock %}
 {% load crispy_forms_tags %}
-
 {% block body %}
 <div class="container-sm">
+
+    {% if user.is_staff %}
+    
     <h4>Opciones de Uso consumo</h4>
     <div class="row">
-        
-        {% if user.is_staff %}
         <div class="col">
-            <a href="{% url 'entradas_uso' %}"><button type="button" id="entrada">Tabla Entradas</button></a>
+            <a href="{% url 'entradas_uso' %}?empresa={{ empresa_seleccionada.id_empresa }}"><button type="button" id="entrada">Tabla Entradas</button></a>
         </div>
         <div class="col">
-            <a href="{% url 'salidas_uso' %}"><button type="button" id="salida">Tabla Salidas</button></a>
+            <a href="{% url 'salidas_uso' %}?empresa={{ empresa_seleccionada.id_empresa }}"><button type="button" id="salida">Tabla Salidas</button></a>
         </div>
         <div class="col">
-            <a href="{% url 'oportunidad_uso' %}"><button type="button" id="oportunidad">Tabla Oportunidades</button></a>
+            <a href="{% url 'oportunidad_uso' %}?empresa={{ empresa_seleccionada.id_empresa }}"><button type="button" id="oportunidad">Tabla Oportunidades</button></a>
         </div>
 
         {% else %}   
