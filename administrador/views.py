@@ -4629,3 +4629,36 @@ def descargar_resumen(request):
     response = HttpResponse(buffer.getvalue(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
     response['Content-Disposition'] = 'attachment; filename="resumen_200_palabras.docx"'
     return response
+
+
+def procesamiento_area(request):
+    empresas = Empresa.objects.all().order_by('nombre')
+
+    empresa_id = request.GET.get('empresa')
+    etapa_key = request.GET.get('etapa')
+    entrada_key = request.GET.get('entrada')
+
+    empresa_seleccionada = None
+    etapa_seleccionada = None
+    entrada_seleccionada = None
+    etapas = []
+
+    if empresa_id:
+        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
+        etapas = Etapa.objects.all()
+
+    if etapa_key:
+        etapa_seleccionada = etapa_key
+
+    if entrada_key:
+        entrada_seleccionada = entrada_key
+
+    data = {
+        'empresas': empresas,
+        'empresa_seleccionada': empresa_seleccionada,
+        'etapas': etapas,
+        'etapa_seleccionada': etapa_seleccionada,
+        'entrada_seleccionada': entrada_seleccionada,
+    }
+
+    return render(request, 'procesamiento_area/procesamiento_area.html', data)
