@@ -51,17 +51,17 @@
                 {% endfor %}
             </div>
 
-            <hr>
-
             {% if empresa_seleccionada %}
+
+            <hr>
             <h3>¿Qué etapa deseas ver?</h3>
 
+            <!-- Selección de etapas por ID numérico -->
             <div class="row">
                 <div class="col-auto"><strong>1.</strong></div>
                 <div class="col">
-                    <a href="?empresa={{ empresa_seleccionada.id_empresa }}&etapa=extraccion_materiaPrima">
-                        <button type="button"
-                            class="btn {% if etapa_seleccionada == 'extraccion_materiaPrima' %}btn-success{% endif %}">
+                    <a href="?empresa={{ empresa_seleccionada.id_empresa }}&etapa=1">
+                        <button type="button" class="btn {% if etapa_seleccionada == 1 %}btn-success{% endif %}">
                             Extracción Materia Prima
                         </button>
                     </a>
@@ -69,9 +69,8 @@
 
                 <div class="col-auto"><strong>2.</strong></div>
                 <div class="col">
-                    <a href="?empresa={{ empresa_seleccionada.id_empresa }}&etapa=diseño_Produccion">
-                        <button type="button"
-                            class="btn {% if etapa_seleccionada == 'diseño_Produccion' %}btn-success{% endif %}">
+                    <a href="?empresa={{ empresa_seleccionada.id_empresa }}&etapa=2">
+                        <button type="button" class="btn {% if etapa_seleccionada == 2 %}btn-success{% endif %}">
                             Diseño y Producción
                         </button>
                     </a>
@@ -79,9 +78,8 @@
 
                 <div class="col-auto"><strong>3.</strong></div>
                 <div class="col">
-                    <a href="?empresa={{ empresa_seleccionada.id_empresa }}&etapa=logistica">
-                        <button type="button"
-                            class="btn {% if etapa_seleccionada == 'logistica' %}btn-success{% endif %}">
+                    <a href="?empresa={{ empresa_seleccionada.id_empresa }}&etapa=3">
+                        <button type="button" class="btn {% if etapa_seleccionada == 3 %}btn-success{% endif %}">
                             Logística
                         </button>
                     </a>
@@ -93,8 +91,8 @@
             <div class="row">
                 <div class="col-auto"><strong>4.</strong></div>
                 <div class="col">
-                    <a href="?empresa={{ empresa_seleccionada.id_empresa }}&etapa=compra">
-                        <button type="button" class="btn {% if etapa_seleccionada == 'compra' %}btn-success{% endif %}">
+                    <a href="?empresa={{ empresa_seleccionada.id_empresa }}&etapa=4">
+                        <button type="button" class="btn {% if etapa_seleccionada == 4 %}btn-success{% endif %}">
                             Compra
                         </button>
                     </a>
@@ -102,9 +100,8 @@
 
                 <div class="col-auto"><strong>5.</strong></div>
                 <div class="col">
-                    <a href="?empresa={{ empresa_seleccionada.id_empresa }}&etapa=uso_consumo">
-                        <button type="button"
-                            class="btn {% if etapa_seleccionada == 'uso_consumo' %}btn-success{% endif %}">
+                    <a href="?empresa={{ empresa_seleccionada.id_empresa }}&etapa=5">
+                        <button type="button" class="btn {% if etapa_seleccionada == 5 %}btn-success{% endif %}">
                             Uso Consumo
                         </button>
                     </a>
@@ -112,19 +109,18 @@
 
                 <div class="col-auto"><strong>6.</strong></div>
                 <div class="col">
-                    <a href="?empresa={{ empresa_seleccionada.id_empresa }}&etapa=fin_vida">
-                        <button type="button"
-                            class="btn {% if etapa_seleccionada == 'fin_vida' %}btn-success{% endif %}">
+                    <a href="?empresa={{ empresa_seleccionada.id_empresa }}&etapa=6">
+                        <button type="button" class="btn {% if etapa_seleccionada == 6 %}btn-success{% endif %}">
                             Fin de Vida
                         </button>
                     </a>
                 </div>
             </div>
+
             {% endif %}
 
-            <hr>
-
             {% if empresa_seleccionada and etapa_seleccionada %}
+            <hr>
             <h3 class="mt-4">¿Qué desea procesar?</h3>
 
             <div class="row">
@@ -132,7 +128,7 @@
                     <a
                         href="?empresa={{ empresa_seleccionada.id_empresa }}&etapa={{ etapa_seleccionada }}&entrada=entrada">
                         <button type="button" id="entrada"
-                            class="{% if entrada_seleccionada == 'entrada' %}selected{% endif %}">
+                            class="btn {% if entrada_seleccionada == 'entrada' %}btn-success{% endif %}">
                             Entradas
                         </button>
                     </a>
@@ -142,7 +138,7 @@
                     <a
                         href="?empresa={{ empresa_seleccionada.id_empresa }}&etapa={{ etapa_seleccionada }}&entrada=salida">
                         <button type="button" id="salida"
-                            class="{% if entrada_seleccionada == 'salida' %}selected{% endif %}">
+                            class="btn {% if entrada_seleccionada == 'salida' %}btn-success{% endif %}">
                             Salidas
                         </button>
                     </a>
@@ -152,13 +148,48 @@
                     <a
                         href="?empresa={{ empresa_seleccionada.id_empresa }}&etapa={{ etapa_seleccionada }}&entrada=oportunidad">
                         <button type="button" id="oportunidad"
-                            class="{% if entrada_seleccionada == 'oportunidad' %}selected{% endif %}">
+                            class="btn {% if entrada_seleccionada == 'oportunidad' %}btn-success{% endif %}">
                             Oportunidades
                         </button>
                     </a>
                 </div>
             </div>
             {% endif %}
+
+
+            <hr>
+
+            <!-- CAJA CHATGPT -->
+            {% if texto_concatenado %}
+            <h3 class="mt-4">Contenido Detectado</h3>
+
+            <form method="POST">
+                {% csrf_token %}
+                <textarea name="texto_concatenado" class="form-control" rows="8">{{ texto_concatenado }}</textarea>
+                <br>
+                <button type="submit" class="btn btn-primary w-100">Generar Resumen</button>
+            </form>
+            {% endif %}
+
+            {% if resumen_ia %}
+            <hr>
+            <h3 class="mt-3">Resumen Generado por IA</h3>
+            <div class="alert alert-secondary">
+                {{ resumen_ia }}
+            </div>
+
+            <div class="text-center mt-3">
+                <form action="{% url 'descargar_resumen' %}" method="get" style="display: inline;">
+                    <input type="hidden" name="resumen" value="{{ resumen_ia }}">
+                    <button type="submit" class="btn btn-primary">
+                        Descargar resumen 200 palabras
+                    </button>
+                </form>
+            </div>
+
+            {% endif %}
+
+
 
             {% endif %}
 
@@ -168,6 +199,7 @@
                 <button type="button" class="btn btn-primary">Iniciar Sesión</button>
             </a>
             {% endif %}
+
 
         </div>
     </div>

@@ -4632,33 +4632,96 @@ def descargar_resumen(request):
 
 
 def procesamiento_area(request):
-    empresas = Empresa.objects.all().order_by('nombre')
+    empresa_id = request.GET.get("empresa")
+    etapa_id = request.GET.get("etapa")
+    entrada_key = request.GET.get("entrada")
 
-    empresa_id = request.GET.get('empresa')
-    etapa_key = request.GET.get('etapa')
-    entrada_key = request.GET.get('entrada')
-
+    empresas = Empresa.objects.all()
     empresa_seleccionada = None
     etapa_seleccionada = None
     entrada_seleccionada = None
-    etapas = []
+    etapa_obj = None
+    texto_concatenado = ""
+    resumen_ia = None
 
+    # 1) Empresa
     if empresa_id:
-        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
-        etapas = Etapa.objects.all()
+        try:
+            empresa_seleccionada = Empresa.objects.get(id_empresa=int(empresa_id))
+        except:
+            empresa_seleccionada = None
 
-    if etapa_key:
-        etapa_seleccionada = etapa_key
+    # 2) Etapa
+    if etapa_id:
+        try:
+            etapa_seleccionada = int(etapa_id)
+            etapa_obj = Etapa.objects.get(id_etapa=etapa_seleccionada)
+        except:
+            etapa_seleccionada = None
+            etapa_obj = None
 
-    if entrada_key:
+    # 3) Tipo (entrada, salida, oportunidad)
+    if entrada_key in ["entrada", "salida", "oportunidad"]:
         entrada_seleccionada = entrada_key
 
-    data = {
-        'empresas': empresas,
-        'empresa_seleccionada': empresa_seleccionada,
-        'etapas': etapas,
-        'etapa_seleccionada': etapa_seleccionada,
-        'entrada_seleccionada': entrada_seleccionada,
-    }
+    # 4) Buscar información
+    if empresa_seleccionada and etapa_obj and entrada_seleccionada:
 
-    return render(request, 'procesamiento_area/procesamiento_area.html', data)
+        if entrada_seleccionada == "entrada":
+            registros = Entrada.objects.filter(
+                etapa=etapa_obj,
+                id_area__id_empresa=empresa_seleccionada
+            )
+
+        elif entrada_seleccionada == "salida":
+            registros = Salida.objects.filter(
+                etapa=etapa_obj,
+                id_area__id_empresa=empresa_seleccionada
+            )
+
+        elif entrada_seleccionada == "oportunidad":
+            registros = Oportunidades.objects.filter(
+                etapa=etapa_obj,
+                id_area__id_empresa=empresa_seleccionada
+            )
+
+        texto_concatenado = " ".join([r.nombre for r in registros])
+
+        # ----------- PROCESAR RESUMEN (POST) ----------------- 
+        
+        texto_a_resumir = request.POST.get("texto_concatenado", "")
+
+        if texto_a_resumir:
+            try:
+                api_key = os.getenv("OPENAI_API_KEY")
+                client = OpenAI(api_key=api_key)
+
+                prompt = (
+                    "Resume el siguiente texto en un máximo de 200 palabras, "
+                    "manteniendo claridad, precisión y tono profesional:\n\n" +
+                    texto_a_resumir
+                )
+
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": "Eres un experto en análisis y síntesis de texto."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=500,
+                    temperature=0.5
+                )
+
+                resumen_ia = response.choices[0].message.content.strip()
+
+            except Exception as e:
+                resumen_ia = "Error al generar el resumen: " + str(e)
+
+    return render(request, "procesamiento_area/procesamiento_area.html", {
+        "empresas": empresas,
+        "empresa_seleccionada": empresa_seleccionada,
+        "etapa_seleccionada": etapa_seleccionada,
+        "entrada_seleccionada": entrada_seleccionada,
+        "texto_concatenado": texto_concatenado,
+        "resumen_ia": resumen_ia,
+    })

@@ -15,6 +15,7 @@ urlpatterns = [
     path('home_admin', homeAdmin, name='home_admin'),
     path('home_empresa/<id>/', home_empresa, name='home_empresa'),
     path('home_graficos', homeGraficos, name = "home_graficos"),
+    path('procesamiento_area', procesamiento_area, name='procesamiento_area'),
 
     #Graficos
     path('area_graficos/<id>/', etapaGraficos, name='area_graficos'),
@@ -121,7 +122,6 @@ urlpatterns = [
     path('descargar_resumen', descargar_resumen, name='descargar_resumen'),
 
     #procesamiento por area
-    path('procesamiento_area', procesamiento_area, name='procesamiento_area'),
     path('procesamiento_area/<int:id_empresa>/', procesamiento_area, name="procesamiento_area_empresa"),
     
 
