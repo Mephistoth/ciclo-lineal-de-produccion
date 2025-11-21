@@ -1,7 +1,7 @@
 from email import message
 from time import process_time_ns
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import AreaEmpresa, Entrada, Etapa, RegistroTrabajador, Salida, Oportunidades, Empresa
+from .models import AreaEmpresa, Entrada, Etapa, RegistroTrabajador, Salida, Oportunidades, Empresa, Idea
 from django.contrib import messages
 from .forms import EntradaForm, SalidaForm, OportunidadForm
 from user.models import Usuario
@@ -919,7 +919,29 @@ def agregarOportunidadFin(request):
         return render(request, 'autodiagnostico/finVida/oportunidad/agregar_oportunidad.html') 
 
 def eliminarOportunidadFinVida(request, id):
+
     oportunidad = get_object_or_404(Oportunidades, id_oportunidad=id, usuario=request.user)
     oportunidad.delete()
     messages.success(request, "Oportunidad eliminada correctamente.")
     return redirect('agregar_oportunidad_fin_vida')
+
+
+def ingresar_ideas(request):
+    if request.method == "POST":
+        texto = request.POST.get("texto")
+
+        if not texto or texto.strip() == "":
+            return HttpResponse("Debe ingresar una idea.")
+
+        registro = RegistroTrabajador.objects.get(usuario=request.user)
+
+        Idea.objects.create(
+            usuario=request.user,
+            empresa=registro.id_area.id_empresa,
+            area=registro.id_area,
+            texto=texto
+        )
+
+        return redirect('ingresar_ideas')
+
+    return render(request, 'ideas/ingresar_ideas.html')

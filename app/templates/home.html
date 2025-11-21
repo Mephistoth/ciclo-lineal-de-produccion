@@ -58,18 +58,18 @@
                     <li style="border-left: 1px solid white;"><a href="{% url 'home_graficos' %}">Graficos</a></li>
                     <li style="border-left: 1px solid white;"><a href="{% url 'log_telegram' %}">Log Telegram</a></li>
                     <li style="border-left: 1px solid white;"><a href="admin/">Admin Django</a></li>
-                    <li style="border-left: 1px solid white;"><a href="{% url 'Home_api' %}">APIS</a></li>
-                    <li style="border-left: 1px solid white;"><a href="{% url 'ia_semantica' %}">Procesamiento Texto Libre</a></li>
-                    <li style="border-left: 1px solid white;"><a href="{% url 'procesamiento_area' %}">Procesamiento por Área</a></li>
-                    {% endif %}
-
-
-                    <!--<li><a href="#elements">Elements</a></li>-->
                 </ul>
+                <ul style="margin-top: 10px;">
+                    <li style="border-left: 1px solid white;"><a href="{% url 'ia_semantica' %}">Procesamiento Texto Libre</a></li>
+                    <li style="border-left: 1px solid white;"><a href="{% url 'Home_api' %}">APIS</a></li>
+                    <li style="border-left: 1px solid white;"><a style="padding-left: 69px; padding-right: 42px;" href="{% url 'procesamiento_area' %}">Procesamiento por Área</a></li>
+                </ul>
+                    {% endif %}
+                    <!--<li><a href="#elements">Elements</a></li>-->
             </nav>
 
             <nav>
-                <ul>
+                <ul style="margin-top: -20px;">
                     {% if user.is_authenticated %}
                     <li><a href="{% url 'logout' %}">Cerrar Sesion</a></li>
                     {% else %}
@@ -78,7 +78,7 @@
                 </ul>
             </nav>
 
-            <nav>
+            <nav style="margin-top: 20px;">
                 <ul>
 
                     <!-- <li><a href="#about">About</a></li> -->
@@ -87,8 +87,11 @@
                     {% if not user.is_staff %}
                     <li><a href="{% url 'auto_diagnostico' %}">Auto Diagnóstico</a></li>
                     {% endif %}
-
-
+                </ul>
+                <ul style="margin-top: 10px;">
+                    {% if user.is_authenticated and not user.is_staff %}
+                    <li><a style="padding-left: 80px;padding-right: 73px;" href="{% url 'ingresar_ideas' %}">Ideas</a></li>
+                    {% endif %}
                     <!--<li><a href="#elements">Elements</a></li>-->
                 </ul>
             </nav>

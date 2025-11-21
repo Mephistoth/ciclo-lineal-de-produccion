@@ -58,4 +58,7 @@ urlpatterns = [
     path('eliminar_entrada_fin_vida/<int:id>/', eliminarEntradaFinVida, name='eliminar_entrada_fin_vida'),
     path('eliminar_oportunidad_fin_vida/<int:id>/', eliminarOportunidadFinVida, name='eliminar_oportunidad_fin_vida'),
     path('eliminar_salida_fin_vida/<int:id>/', eliminarSalidaFinVida, name='eliminar_salida_fin_vida'),
+
+    #ideas
+    path('ideas', ingresar_ideas, name="ingresar_ideas")
 ]
