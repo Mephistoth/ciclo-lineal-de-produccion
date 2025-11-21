@@ -115,12 +115,12 @@ class Idea(models.Model):
     id_idea = models.AutoField(primary_key=True)
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
-    area = models.ForeignKey(AreaEmpresa, on_delete=models.CASCADE)
+    etapa = models.ForeignKey(Etapa, on_delete=models.CASCADE)
     texto = models.TextField()
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Idea de {self.usuario} en {self.empresa.nombre}"
+        return f"Idea de {self.usuario} en {self.empresa.nombre} (Etapa: {self.etapa.nombre})"
 
 
 
