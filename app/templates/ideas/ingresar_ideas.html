@@ -49,8 +49,8 @@
             <div class="row">
                 <div class="col-auto"><strong>1.</strong></div>
                 <div class="col">
-                    <a href="{% url 'ingresar_ideas' 'extraccion' %}">
-                        <button type="button" class="btn {% if etapa == 'extraccion' %}btn-success{% endif %}">
+                    <a href="{% url 'ingresar_idea' 1 %}">
+                        <button type="button" class="btn {% if etapa and etapa.id_etapa == 1 %}btn-success{% endif %}">
                             Extracción Materia Prima
                         </button>
                     </a>
@@ -58,8 +58,8 @@
 
                 <div class="col-auto"><strong>2.</strong></div>
                 <div class="col">
-                    <a href="{% url 'ingresar_ideas' 'diseño' %}">
-                        <button type="button" class="btn {% if etapa == 'diseño' %}btn-success{% endif %}">
+                    <a href="{% url 'ingresar_idea' 2 %}">
+                        <button type="button" class="btn {% if etapa and etapa.id_etapa == 2 %}btn-success{% endif %}">
                             Diseño y producción
                         </button>
                     </a>
@@ -67,8 +67,8 @@
 
                 <div class="col-auto"><strong>3.</strong></div>
                 <div class="col">
-                    <a href="{% url 'ingresar_ideas' 'logistica' %}">
-                        <button type="button" class="btn {% if etapa == 'logistica' %}btn-success{% endif %}">
+                    <a href="{% url 'ingresar_idea' 3 %}">
+                        <button type="button" class="btn {% if etapa and etapa.id_etapa == 3 %}btn-success{% endif %}">
                             Logística
                         </button>
                     </a>
@@ -80,8 +80,8 @@
             <div class="row">
                 <div class="col-auto"><strong>4.</strong></div>
                 <div class="col">
-                    <a href="{% url 'ingresar_ideas' 'compra' %}">
-                        <button type="button" class="btn {% if etapa == 'compra' %}btn-success{% endif %}">
+                    <a href="{% url 'ingresar_idea' 4 %}">
+                        <button type="button" class="btn {% if etapa and etapa.id_etapa == 4 %}btn-success{% endif %}">
                             Compra
                         </button>
                     </a>
@@ -89,8 +89,8 @@
 
                 <div class="col-auto"><strong>5.</strong></div>
                 <div class="col">
-                    <a href="{% url 'ingresar_ideas' 'uso' %}">
-                        <button type="button" class="btn {% if etapa == 'uso' %}btn-success{% endif %}">
+                    <a href="{% url 'ingresar_idea' 5 %}">
+                        <button type="button" class="btn {% if etapa and etapa.id_etapa == 5 %}btn-success{% endif %}">
                             Uso consumo
                         </button>
                     </a>
@@ -98,31 +98,36 @@
 
                 <div class="col-auto"><strong>6.</strong></div>
                 <div class="col">
-                    <a href="{% url 'ingresar_ideas' 'fin' %}">
-                        <button type="button" class="btn {% if etapa == 'fin' %}btn-success{% endif %}">
+                    <a href="{% url 'ingresar_idea' 6 %}">
+                        <button type="button" class="btn {% if etapa and etapa.id_etapa == 6 %}btn-success{% endif %}">
                             Fin de vida
                         </button>
                     </a>
                 </div>
             </div>
-
             <hr>
 
+            <!-- FORMULARIO -->
             {% if etapa %}
-            <h2 class="titulo-seccion text-center my-4" style="margin-top: 20px;">INGRESA TUS IDEAS</h2>
+            <h2 class="titulo-seccion text-center my-4">INGRESA TUS IDEAS</h2>
 
-            <form method="POST" action="{% url 'ingresar_ideas' etapa %}">
+            <form method="POST" action="{% url 'ingresar_idea' etapa.id_etapa %}">
                 {% csrf_token %}
-
                 <div class="mb-3">
                     <label for="idea" class="form-label"><strong>Ingresa tu idea:</strong></label>
                     <textarea id="idea" name="texto" class="form-control" rows="6"
                         placeholder="Escribe tu idea aquí..."></textarea>
                 </div>
-
-                <button type="submit" class="btn btn-success" style="margin-left: 480px;">Guardar Idea</button>
+                <button type="submit" class="btn btn-success d-block mx-auto">Guardar Idea</button>
             </form>
             {% endif %}
+
+            {% if mensaje %}
+            <div class="alert alert-success text-center my-3">
+                {{ mensaje }}
+            </div>
+            {% endif %}
+
 
             {% endif %}
 

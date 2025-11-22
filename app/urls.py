@@ -60,6 +60,6 @@ urlpatterns = [
     path('eliminar_salida_fin_vida/<int:id>/', eliminarSalidaFinVida, name='eliminar_salida_fin_vida'),
 
     #ideas
-    path('ideas', ingresar_ideas, name="ingresar_ideas"),
-    path('ideas/<str:etapa>/', ingresar_ideas, name='ingresar_ideas'),
+    path('ideas/', ingresar_ideas, name="ingresar_ideas"),
+    path('ideas/<int:etapa_id>/', ingresar_ideas, name='ingresar_idea')
 ]

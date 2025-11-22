@@ -926,29 +926,33 @@ def eliminarOportunidadFinVida(request, id):
     return redirect('agregar_oportunidad_fin_vida')
 
 
-def ingresar_ideas(request, etapa=None):
-
+def ingresar_ideas(request, etapa_id=None):
     registros = RegistroTrabajador.objects.filter(usuario=request.user)
+    registro = registros.first()
 
-    if request.method == "POST":
-        texto = request.POST.get("texto")
+    etapas = Etapa.objects.filter(activo=True)
+    etapa = None
+    mensaje = None  # <-- para mostrar mensaje de éxito
 
-        if not texto or texto.strip() == "":
-            return HttpResponse("Debe ingresar una idea.")
+    if etapa_id:
+        etapa = get_object_or_404(Etapa, id_etapa=etapa_id)
 
-        registro = registros.first()
-
-        Idea.objects.create(
-            usuario=request.user,
-            empresa=registro.id_area.id_empresa,
-            area=registro.id_area,
-            texto=texto,
-            etapa=etapa  # Guardar etapa
-        )
-
-        return redirect('ingresar_ideas', etapa=etapa)
+        if request.method == "POST":
+            texto = request.POST.get("texto")
+            if not texto or texto.strip() == "":
+                mensaje = "Debe ingresar una idea."
+            else:
+                Idea.objects.create(
+                    usuario=request.user,
+                    empresa=registro.id_area.id_empresa,
+                    etapa=etapa,
+                    texto=texto
+                )
+                mensaje = "Idea guardada correctamente."
 
     return render(request, 'ideas/ingresar_ideas.html', {
         'registros': registros,
-        'etapa': etapa
+        'etapas': etapas,
+        'etapa': etapa,
+        'mensaje': mensaje
     })
