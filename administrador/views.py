@@ -9,7 +9,7 @@ from datetime import datetime
 from pipes import Template
 from urllib import request
 from django.shortcuts import render
-from app.models import RegistroTrabajador, Etapa, Entrada, Salida, Oportunidades, Empresa, AreaEmpresa
+from app.models import RegistroTrabajador, Etapa, Entrada, Salida, Oportunidades, Empresa, AreaEmpresa, Idea
 from django.db.models import Count
 from Levenshtein import distance, editops, apply_edit, jaro
 from django.views.generic import TemplateView
@@ -4722,6 +4722,80 @@ def procesamiento_area(request):
         "empresa_seleccionada": empresa_seleccionada,
         "etapa_seleccionada": etapa_seleccionada,
         "entrada_seleccionada": entrada_seleccionada,
+        "texto_concatenado": texto_concatenado,
+        "resumen_ia": resumen_ia,
+    })
+
+
+def procesamiento_ideas(request):
+    empresa_id = request.GET.get("empresa")
+    etapa_id = request.GET.get("etapa")
+
+    empresas = Empresa.objects.all()
+    empresa_seleccionada = None
+    etapa_seleccionada = None
+    etapa_obj = None
+    texto_concatenado = ""
+    resumen_ia = None
+
+    # 1) Selección de empresa
+    if empresa_id:
+        try:
+            empresa_seleccionada = Empresa.objects.get(id_empresa=int(empresa_id))
+        except Empresa.DoesNotExist:
+            empresa_seleccionada = None
+
+    # 2) Selección de etapa
+    if etapa_id:
+        try:
+            etapa_seleccionada = int(etapa_id)
+            etapa_obj = Etapa.objects.get(id_etapa=etapa_seleccionada)
+        except Etapa.DoesNotExist:
+            etapa_seleccionada = None
+            etapa_obj = None
+
+    # 3) Concatenar ideas de la empresa y etapa
+    if empresa_seleccionada and etapa_obj:
+        ideas = Idea.objects.filter(
+            empresa=empresa_seleccionada,
+            etapa=etapa_obj
+        )
+        texto_concatenado = " ".join([idea.texto for idea in ideas])
+
+    # 4) Procesar resumen si se envía POST
+    if request.method == "POST":
+        texto_a_resumir = request.POST.get("texto_concatenado", "")
+        if texto_a_resumir:
+            try:
+                api_key = os.getenv("OPENAI_API_KEY")
+                client = OpenAI(api_key=api_key)
+
+                prompt = (
+                    "Resume el siguiente texto en un máximo de 200 palabras, "
+                    "manteniendo claridad, precisión y tono profesional:\n\n" +
+                    texto_a_resumir
+                )
+
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": "Eres un experto en análisis y síntesis de texto."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=500,
+                    temperature=0.5
+                )
+
+                resumen_ia = response.choices[0].message.content.strip()
+
+            except Exception as e:
+                resumen_ia = "Error al generar el resumen: " + str(e)
+
+    return render(request, "procesamiento_ideas/procesamiento_ideas.html", {
+        "empresas": empresas,
+        "empresa_seleccionada": empresa_seleccionada,
+        "etapa_seleccionada": etapa_seleccionada,
+        "etapa_obj": etapa_obj,
         "texto_concatenado": texto_concatenado,
         "resumen_ia": resumen_ia,
     })
