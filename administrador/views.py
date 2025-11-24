@@ -4799,3 +4799,85 @@ def procesamiento_ideas(request):
         "texto_concatenado": texto_concatenado,
         "resumen_ia": resumen_ia,
     })
+
+def home_procesamiento(request):
+    return render(request, "procesamiento/home_procesamiento.html")
+
+def procesamiento_aempresa(request):
+    empresa_id = request.GET.get("empresa")
+    area_id = request.GET.get("area")
+
+    empresas = Empresa.objects.all()
+    empresa_seleccionada = None
+    areas = None
+    area_seleccionada = None
+
+    texto_concatenado = ""
+    resumen_ia = None
+
+    # 1. Selección empresa
+    if empresa_id:
+        try:
+            empresa_seleccionada = Empresa.objects.get(id_empresa=int(empresa_id))
+        except Empresa.DoesNotExist:
+            empresa_seleccionada = None
+
+    # 2. Cargar áreas de la empresa seleccionada
+    if empresa_seleccionada:
+        areas = AreaEmpresa.objects.filter(id_empresa=empresa_seleccionada)
+
+    # 3. Selección área
+    if area_id:
+        try:
+            area_seleccionada = AreaEmpresa.objects.get(id_area=int(area_id))
+        except AreaEmpresa.DoesNotExist:
+            area_seleccionada = None
+
+    # 4. Concatenación de entradas, salidas, oportunidades
+    if area_seleccionada:
+        entradas = Entrada.objects.filter(id_area=area_seleccionada)
+        salidas = Salida.objects.filter(id_area=area_seleccionada)
+        oportunidades = Oportunidades.objects.filter(id_area=area_seleccionada)
+
+        texto_concatenado = " ".join(
+            [e.nombre for e in entradas] +
+            [s.nombre for s in salidas] +
+            [o.nombre for o in oportunidades]
+        )
+
+    # 5. PROCESO DE RESUMEN IA
+    if request.method == "POST":
+        texto_a_resumir = request.POST.get("texto_concatenado", "")
+        if texto_a_resumir:
+            try:
+                client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+                prompt = (
+                    "Resume el siguiente texto en un máximo de 200 palabras, "
+                    "manteniendo claridad, precisión y tono profesional:\n\n" +
+                    texto_a_resumir
+                )
+
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {"role": "system", "content": "Eres un experto en análisis y síntesis de texto."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=500,
+                    temperature=0.5
+                )
+
+                resumen_ia = response.choices[0].message.content.strip()
+
+            except Exception as e:
+                resumen_ia = "Error al generar el resumen: " + str(e)
+
+    return render(request, "procesamiento_aempresa/procesamiento_aempresa.html", {
+        "empresas": empresas,
+        "empresa_seleccionada": empresa_seleccionada,
+        "areas": areas,
+        "area_seleccionada": area_seleccionada,
+        "texto_concatenado": texto_concatenado,
+        "resumen_ia": resumen_ia,
+    })

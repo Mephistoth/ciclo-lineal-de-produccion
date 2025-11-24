@@ -9,7 +9,7 @@ from .views import homeAdmin, home_empresa, tablasExtraccion, entradasExtraccion
                 areasUso, graficosUso, areasFin, graficosFin, ReporteExcel, ReporteExcelSalida, ReporteExcelOportunidades, ReporteExcelEntradaDiseño, ReporteExcelSalidaDiseño, ReporteExcelOportunidadDiseño, \
                 ReporteExcelEntradaLogistica, ReporteExcelSalidaLogistica, ReporteExcelOportunidadLogistica, ReporteExcelEntradaCompra, ReporteExcelSalidaCompra, ReporteExcelOportunidadCompra, \
                 ReporteExcelEntradaUso, ReporteExcelSalidaUso, ReporteExcelOportunidadUso, ReporteExcelEntradaFin, ReporteExcelSalidaFin, ReporteExcelOportunidadFin, log_telegan, ia_semantica, descargar_resumen, \
-                procesamiento_area, procesamiento_ideas
+                procesamiento_area, procesamiento_ideas, home_procesamiento, procesamiento_aempresa
 
 urlpatterns = [
     path('home_admin', homeAdmin, name='home_admin'),
@@ -17,6 +17,9 @@ urlpatterns = [
     path('home_graficos', homeGraficos, name = "home_graficos"),
     path('procesamiento_area', procesamiento_area, name='procesamiento_area'),
     path('procesamiento_ideas', procesamiento_ideas, name='procesamiento_ideas'),
+    path('procesamiento/', home_procesamiento, name='home_procesamiento'),
+    path('procesamiento_aempresa', procesamiento_aempresa, name='procesamiento_aempresa'),
+
 
     #Graficos
     path('area_graficos/<id>/', etapaGraficos, name='area_graficos'),
