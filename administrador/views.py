@@ -4,12 +4,19 @@ import os
 import base64
 import docx
 import fitz
+import random
+import string
 from ast import Return
 from datetime import datetime
 from pipes import Template
 from urllib import request
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from app.models import RegistroTrabajador, Etapa, Entrada, Salida, Oportunidades, Empresa, AreaEmpresa, Idea
+from user.models import Usuario
+from django.contrib.auth.hashers import make_password
+from django.core.mail import send_mail
+from django.contrib.auth.models import User
+from django.contrib import messages
 from django.db.models import Count
 from Levenshtein import distance, editops, apply_edit, jaro
 from django.views.generic import TemplateView
@@ -4881,3 +4888,109 @@ def procesamiento_aempresa(request):
         "texto_concatenado": texto_concatenado,
         "resumen_ia": resumen_ia,
     })
+
+
+def admin_usuarios(request):
+    empresas = Empresa.objects.all()
+
+    empresa_id = request.GET.get("empresa")
+
+    empresa_seleccionada = None
+    usuarios_area = None
+
+    if empresa_id:
+        try:
+            empresa_seleccionada = Empresa.objects.get(id_empresa=empresa_id)
+
+            # Obtener las áreas de esa empresa
+            areas_empresa = AreaEmpresa.objects.filter(id_empresa=empresa_seleccionada)
+
+            # Obtener los trabajadores registrados en esas áreas
+            usuarios_area = RegistroTrabajador.objects.filter(id_area__in=areas_empresa)
+
+        except Empresa.DoesNotExist:
+            empresa_seleccionada = None
+            usuarios_area = None
+
+    return render(request, "admin_usuarios/admin_usuarios.html", {
+        "empresas": empresas,
+        "empresa_seleccionada": empresa_seleccionada,
+        "usuarios_area": usuarios_area,
+    })
+
+def editar_usuario(request, user_id):
+    usuario = Usuario.objects.get(id=user_id)
+
+    # Obtener el área desde RegistroTrabajador  
+    registro = RegistroTrabajador.objects.filter(usuario=usuario).first()
+    areas = AreaEmpresa.objects.all()
+
+    if request.method == "POST":
+        usuario.first_name = request.POST.get("nombre")
+        usuario.email = request.POST.get("email")
+        usuario.telefono = request.POST.get("telefono")
+        usuario.save()
+
+        nueva_area = request.POST.get("area")
+        if registro:
+            registro.id_area_id = nueva_area
+            registro.save()
+
+        return redirect("admin_usuarios")
+
+    return render(request, "admin_usuarios/editar_usuario.html", {
+        "usuario": usuario,
+        "registro": registro,
+        "areas": areas,
+    })
+
+def eliminar_usuario(request, id):
+    usuario = get_object_or_404(User, id=id)
+
+    # Doble chequeo opcional por backend
+    if request.method == "POST":
+        usuario.delete()
+        return redirect('admin_usuarios')
+
+    # Si es GET, solo eliminamos directamente porque el JS ya pidió confirmación
+    usuario.delete()
+    return redirect('admin_usuarios')
+
+def generar_clave():
+    # 10 caracteres alfa-numéricos
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+
+
+def resetear_clave(request, user_id):
+
+    if request.method == "POST":
+        try:
+            usuario = Usuario.objects.get(pk=user_id)
+
+            # Generar nueva clave
+            nueva_clave = generar_clave()
+            usuario.password = make_password(nueva_clave)
+            usuario.save()
+
+            # Enviar email
+            send_mail(
+                subject="Tu nueva contraseña",
+                message=(
+                    f"Hola {usuario.first_name},\n\n"
+                    f"Tu nueva contraseña es:\n\n{nueva_clave}\n\n"
+                    "Por favor cámbiala después de iniciar sesión."
+                ),
+                from_email=settings.EMAIL_HOST_USER,  # MUY IMPORTANTE
+                recipient_list=[usuario.email],
+                fail_silently=False,
+            )
+
+            messages.success(
+                request,
+                f"Se generó una nueva clave y se envió a {usuario.email}."
+            )
+
+        except Usuario.DoesNotExist:
+            messages.error(request, "El usuario no existe.")
+
+    return redirect('admin_usuarios')

@@ -9,7 +9,7 @@ from .views import homeAdmin, home_empresa, tablasExtraccion, entradasExtraccion
                 areasUso, graficosUso, areasFin, graficosFin, ReporteExcel, ReporteExcelSalida, ReporteExcelOportunidades, ReporteExcelEntradaDiseño, ReporteExcelSalidaDiseño, ReporteExcelOportunidadDiseño, \
                 ReporteExcelEntradaLogistica, ReporteExcelSalidaLogistica, ReporteExcelOportunidadLogistica, ReporteExcelEntradaCompra, ReporteExcelSalidaCompra, ReporteExcelOportunidadCompra, \
                 ReporteExcelEntradaUso, ReporteExcelSalidaUso, ReporteExcelOportunidadUso, ReporteExcelEntradaFin, ReporteExcelSalidaFin, ReporteExcelOportunidadFin, log_telegan, ia_semantica, descargar_resumen, \
-                procesamiento_area, procesamiento_ideas, home_procesamiento, procesamiento_aempresa
+                procesamiento_area, procesamiento_ideas, home_procesamiento, procesamiento_aempresa, admin_usuarios, editar_usuario, eliminar_usuario, resetear_clave
 
 urlpatterns = [
     path('home_admin', homeAdmin, name='home_admin'),
@@ -19,6 +19,10 @@ urlpatterns = [
     path('procesamiento_ideas', procesamiento_ideas, name='procesamiento_ideas'),
     path('procesamiento/', home_procesamiento, name='home_procesamiento'),
     path('procesamiento_aempresa', procesamiento_aempresa, name='procesamiento_aempresa'),
+    path('usuarios/', admin_usuarios, name='admin_usuarios'),
+    path("usuarios/editar/<int:user_id>/", editar_usuario, name="editar_usuario"),
+    path('usuarios/eliminar/<int:id>/', eliminar_usuario, name='eliminar_usuario'),
+    path('usuarios/resetear/<int:user_id>/', resetear_clave, name='resetear_clave'),
 
 
     #Graficos
