@@ -33,6 +33,8 @@ class Usuario(AbstractUser):
     telefono = models.IntegerField(null=True)
     id_telegram = models.CharField(max_length=100, null=True, default=0)
 
+    objects = UsuarioManager()
+
     def __str__(self):
         return self.username
 

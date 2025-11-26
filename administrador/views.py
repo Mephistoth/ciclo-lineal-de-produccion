@@ -4925,6 +4925,10 @@ def editar_usuario(request, user_id):
     registro = RegistroTrabajador.objects.filter(usuario=usuario).first()
     areas = AreaEmpresa.objects.all()
 
+    empresa_id = None
+    if registro and registro.id_area and registro.id_area.id_empresa:
+        empresa_id = registro.id_area.id_empresa.id_empresa
+
     if request.method == "POST":
         usuario.first_name = request.POST.get("nombre")
         usuario.email = request.POST.get("email")
@@ -4936,12 +4940,13 @@ def editar_usuario(request, user_id):
             registro.id_area_id = nueva_area
             registro.save()
 
-        return redirect("admin_usuarios")
+        return redirect(f"/administrador/usuarios?empresa={empresa_id}")
 
     return render(request, "admin_usuarios/editar_usuario.html", {
         "usuario": usuario,
         "registro": registro,
         "areas": areas,
+        "empresa_id": empresa_id,
     })
 
 def eliminar_usuario(request, id):
@@ -4994,3 +4999,52 @@ def resetear_clave(request, user_id):
             messages.error(request, "El usuario no existe.")
 
     return redirect('admin_usuarios')
+
+
+def crear_usuario(request):
+    empresa_id = request.GET.get("empresa")  # recuperar empresa desde el botón
+    areas = AreaEmpresa.objects.filter(id_empresa=empresa_id)
+
+    if request.method == "POST":
+        username = request.POST.get("username")
+        nombre = request.POST.get("nombre")
+        apellido = request.POST.get("apellido")
+        email = request.POST.get("email")
+        telefono = request.POST.get("telefono")
+        area_id = request.POST.get("area")
+
+        # Usar tu función existente
+        clave_temporal = generar_clave()
+
+        # Crear usuario
+        usuario = Usuario.objects.create_user(
+                username,
+                nombre,
+                apellido,
+                telefono,
+                email,
+                clave_temporal
+        )
+
+        # Crear registro trabajador
+        RegistroTrabajador.objects.create(
+            usuario=usuario,
+            id_area_id=area_id,
+            descripcion="Usuario recién creado"
+        )
+
+        # Enviar email
+        send_mail(
+            subject="Tu cuenta ha sido creada",
+            message=f"Hola {nombre}, tu clave temporal es: {clave_temporal}",
+            from_email="no-reply@tuapp.com",
+            recipient_list=[email],
+            fail_silently=False,
+        )
+
+        return redirect(f"/administrador/usuarios?empresa={empresa_id}")
+
+    return render(request, "admin_usuarios/crear_usuario.html", {
+        "areas": areas,
+        "empresa_id": empresa_id
+    })
