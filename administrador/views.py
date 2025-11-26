@@ -4919,29 +4919,70 @@ def admin_usuarios(request):
     })
 
 def editar_usuario(request, user_id):
-    usuario = Usuario.objects.get(id=user_id)
+    # Obtener usuario
+    usuario = get_object_or_404(Usuario, id=user_id)
 
-    # Obtener el área desde RegistroTrabajador  
+    # Registro (puede ser None si aún no tiene registro)
     registro = RegistroTrabajador.objects.filter(usuario=usuario).first()
-    areas = AreaEmpresa.objects.all()
 
-    empresa_id = None
+    # Determinar empresa_id: preferimos la empresa del registro; si no, tomar ?empresa=...
     if registro and registro.id_area and registro.id_area.id_empresa:
         empresa_id = registro.id_area.id_empresa.id_empresa
+    else:
+        empresa_id = request.GET.get("empresa")
+
+    # Si no hay empresa identificada, no permitimos editar áreas (seguridad)
+    if not empresa_id:
+        messages.error(request, "No se pudo determinar la empresa del usuario. Contacte al administrador.")
+        return redirect("admin_usuarios")
+
+    # Cargar sólo las áreas de esa empresa
+    areas = AreaEmpresa.objects.filter(id_empresa__id_empresa=empresa_id)
 
     if request.method == "POST":
-        usuario.first_name = request.POST.get("nombre")
-        usuario.email = request.POST.get("email")
-        usuario.telefono = request.POST.get("telefono")
+        nombre = request.POST.get("nombre", "").strip()
+        email = request.POST.get("email", "").strip()
+        telefono = request.POST.get("telefono", "").strip()
+        area_id = request.POST.get("area")
+
+        # Validaciones básicas
+        if not nombre:
+            messages.error(request, "El nombre no puede estar vacío.")
+            return redirect(request.path + f"?empresa={empresa_id}")
+
+        # Actualizar campos del usuario
+        usuario.first_name = nombre
+        usuario.email = email
+        usuario.telefono = telefono if telefono != "" else None
         usuario.save()
 
-        nueva_area = request.POST.get("area")
-        if registro:
-            registro.id_area_id = nueva_area
-            registro.save()
+        # Si no existe registro lo creamos con el área seleccionada (si es válida)
+        try:
+            nueva_area = AreaEmpresa.objects.get(id_area=area_id)
+        except AreaEmpresa.DoesNotExist:
+            messages.error(request, "Área seleccionada no válida.")
+            return redirect(request.path + f"?empresa={empresa_id}")
 
+        # Validar que la nueva área sea de la MISMA empresa
+        if str(nueva_area.id_empresa.id_empresa) != str(empresa_id):
+            messages.error(request, "No se puede asignar un usuario a un área de otra empresa.")
+            return redirect(request.path + f"?empresa={empresa_id}")
+
+        if registro:
+            registro.id_area = nueva_area
+            registro.save()
+        else:
+            # crear registro si no existía
+            RegistroTrabajador.objects.create(
+                usuario=usuario,
+                id_area=nueva_area,
+                descripcion="Asignado desde edición de usuario"
+            )
+
+        messages.success(request, "Usuario actualizado correctamente.")
         return redirect(f"/administrador/usuarios?empresa={empresa_id}")
 
+    # renderizar template con areas filtradas
     return render(request, "admin_usuarios/editar_usuario.html", {
         "usuario": usuario,
         "registro": registro,
