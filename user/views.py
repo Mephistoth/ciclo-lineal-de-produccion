@@ -1,3 +1,4 @@
+import csv
 from ast import Try
 from email import message
 from pdb import post_mortem
@@ -9,7 +10,11 @@ from django.contrib.auth import authenticate, login
 from app.models import AreaEmpresa, RegistroTrabajador
 from .models import Usuario
 from tablib import Dataset 
-import csv
+from django.core.mail import send_mail
+from administrador.views import generar_clave
+from django.contrib import messages
+
+
 # Create your views here.
 
 
@@ -88,3 +93,37 @@ def agregraIDtelegram(request, id):
 
 def registro_usuario(request):
     pass
+
+def reset_password(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+
+        # buscar usuario por email
+        try:
+            usuario = Usuario.objects.get(email=email)
+        except Usuario.DoesNotExist:
+            messages.error(request, "No existe un usuario con ese correo.")
+            return redirect('reset_password')
+
+        # generar clave temporal
+        nueva_clave = generar_clave()
+        usuario.set_password(nueva_clave)
+        usuario.save()
+
+        # enviar correo
+        send_mail(
+            "Recuperación de contraseña",
+            f"Hola {usuario.username}, tu nueva clave temporal es: {nueva_clave}",
+            "no-reply@tuempresa.com",
+            [usuario.email],
+            fail_silently=False,
+        )
+
+        messages.success(
+            request,
+            "Se ha enviado una nueva clave temporal a su correo."
+        )
+
+        return redirect('login')
+
+    return render(request, "registration/reset_password.html")
