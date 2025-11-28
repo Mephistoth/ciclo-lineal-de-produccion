@@ -96,24 +96,30 @@ def registro_usuario(request):
 
 def reset_password(request):
     if request.method == "POST":
-        email = request.POST.get("email")
+        email = request.POST.get("email", "").strip()
 
-        # buscar usuario por email
-        try:
-            usuario = Usuario.objects.get(email=email)
-        except Usuario.DoesNotExist:
-            messages.error(request, "No existe un usuario con ese correo.")
+        # Validar que el email no venga vacío
+        if not email:
+            messages.error(request, "Debe ingresar un correo electrónico.")
             return redirect('reset_password')
 
-        # generar clave temporal
+        # Validar que el email exista en el sistema
+        usuario = Usuario.objects.filter(email=email).first()
+        if not usuario:
+            messages.error(request, "No existe un usuario registrado con ese correo.")
+            return redirect('reset_password')
+
+        # Generar clave temporal
         nueva_clave = generar_clave()
         usuario.set_password(nueva_clave)
         usuario.save()
 
-        # enviar correo
+        # Enviar correo
         send_mail(
             "Recuperación de contraseña",
-            f"Hola {usuario.username}, tu nueva clave temporal es: {nueva_clave}",
+            f"Hola {usuario.first_name or usuario.username},\n\n"
+            f"Tu nueva clave temporal es: {nueva_clave}\n\n"
+            "Inicia sesión y cámbiala lo antes posible.",
             "no-reply@tuempresa.com",
             [usuario.email],
             fail_silently=False,
@@ -123,7 +129,6 @@ def reset_password(request):
             request,
             "Se ha enviado una nueva clave temporal a su correo."
         )
-
         return redirect('login')
 
     return render(request, "registration/reset_password.html")

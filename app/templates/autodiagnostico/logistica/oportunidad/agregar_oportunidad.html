@@ -41,7 +41,7 @@
                 <div class="card-body">
                     <h5 class="card-title">{{p.etapa}}</h5>
                     <p class="card-text">{{p.nombre}}</p>
-                    <form action="{% url 'eliminar_oportunidad_logistica' p.id_oportunidad %}" method="post"
+                    <form action="{% url 'eliminar_oportunidad_logistica' p.id_entrada %}" method="post"
                     style="margin-top:10px;">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger btn-sm">Eliminar

@@ -184,16 +184,17 @@ def eliminarSalidaExtraccion(request, id):
 def agregarOportunidadExtraccion(request):
     if request.user.is_authenticated:
         registros = RegistroTrabajador.objects.filter(usuario=request.user)
-        etapa = Etapa.objects.values_list("id_etapa", flat=True).filter(nombre="Extraccion materia prima")
+
+        # ← ARREGLO AQUÍ
+        etapa = Etapa.objects.get(nombre="Extraccion materia prima").id_etapa
+        areaTrabajador = RegistroTrabajador.objects.get(usuario=request.user).id_area_id
+
         oportunidades = Oportunidades.objects.filter(usuario=request.user)
-        areaTrabajador = RegistroTrabajador.objects.values_list("id_area", flat=True).filter(usuario = request.user)
 
         data = {
-
             'form': OportunidadForm(),
             'registros': registros,
             'oportunidad': oportunidades
-
         }
 
         if request.method == 'POST':
@@ -202,18 +203,19 @@ def agregarOportunidadExtraccion(request):
                 post = formulario.save(commit=False)
                 post.nombre = request.POST["nombre"]
                 post.usuario_id = request.user.id
-                post.etapa_id = etapa
-                post.id_area_id = areaTrabajador
-                formulario.save()
+                post.etapa_id = etapa              # ← AHORA SÍ ES UN ENTERO
+                post.id_area_id = areaTrabajador   # ← AHORA SÍ ES UN ENTERO
+                post.save()
                 messages.success(request, "Entrada Registrada con exito")
             else:
                 data["form"] = formulario
+
         return render(request,'autodiagnostico/extraccion/oportunidad/agregar_oportunidad.html', data)
     else:
         return render(request, 'autodiagnostico/extraccion/oportunidad/agregar_oportunidad.html')
 
 def eliminarOportunidadExtraccion(request, id):
-    oportunidad = get_object_or_404(Oportunidades, id_oportunidad=id, usuario=request.user)
+    oportunidad = get_object_or_404(Oportunidades, id_entrada=id, usuario=request.user)
     oportunidad.delete()
     messages.success(request, "Oportunidad eliminada correctamente.")
     return redirect('agregar_oportunidad_extraccion')
@@ -357,7 +359,7 @@ def agregarOportunidadDiseño(request):
 
 
 def eliminarOportunidadDiseño(request, id):
-    oportunidad = get_object_or_404(Oportunidades, id_oportunidad=id, usuario=request.user)
+    oportunidad = get_object_or_404(Oportunidades, id_entrada=id, usuario=request.user)
     oportunidad.delete()
     messages.success(request, "Oportunidad eliminada correctamente.")
     return redirect('agregar_oportunidad_diseño')
@@ -498,7 +500,7 @@ def agregarOportunidadLogistica(request):
         return render(request, 'autodiagnostico/logistica/oportunidad/agregar_oportunidad.html')
 
 def eliminarOportunidadLogistica(request, id):
-    oportunidad = get_object_or_404(Oportunidades, id_oportunidad=id, usuario=request.user)
+    oportunidad = get_object_or_404(Oportunidades, id_entrada=id, usuario=request.user)
     oportunidad.delete()
     messages.success(request, "Oportunidad eliminada correctamente.")
     return redirect('agregar_oportunidad_logistica')
@@ -638,7 +640,7 @@ def agregarOportunidadCompra(request):
         return render(request, 'autodiagnostico/compra/oportunidad/agregar_oportunidad.html') 
 
 def eliminarOportunidadCompra(request, id):
-    oportunidad = get_object_or_404(Oportunidades, id_oportunidad=id, usuario=request.user)
+    oportunidad = get_object_or_404(Oportunidades, id_entrada=id, usuario=request.user)
     oportunidad.delete()
     messages.success(request, "Oportunidad eliminada correctamente.")
     return redirect('agregar_oportunidad_compra')
@@ -779,7 +781,7 @@ def agregarOportunidadUso(request):
         return render(request, 'autodiagnostico/usoConsumo/oportunidad/agregar_oportunidad.html')   
 
 def eliminarOportunidadUso(request, id):
-    oportunidad = get_object_or_404(Oportunidades, id_oportunidad=id, usuario=request.user)
+    oportunidad = get_object_or_404(Oportunidades, id_entrada=id, usuario=request.user)
     oportunidad.delete()
     messages.success(request, "Oportunidad eliminada correctamente.")
     return redirect('agregar_oportunidad_uso')
@@ -920,7 +922,7 @@ def agregarOportunidadFin(request):
 
 def eliminarOportunidadFinVida(request, id):
 
-    oportunidad = get_object_or_404(Oportunidades, id_oportunidad=id, usuario=request.user)
+    oportunidad = get_object_or_404(Oportunidades, id_entrada=id, usuario=request.user)
     oportunidad.delete()
     messages.success(request, "Oportunidad eliminada correctamente.")
     return redirect('agregar_oportunidad_fin_vida')
