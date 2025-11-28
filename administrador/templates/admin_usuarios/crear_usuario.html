@@ -1,11 +1,11 @@
 {% load static %}
 <!DOCTYPE HTML>
-<html>
+<html lang="es">
 
 <head>
     <title>Ciclo Circular</title>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -21,21 +21,25 @@
 <body class="is-preload">
 
     <style>
-    .formulario-usuario label,
-    .formulario-usuario input,
-    .formulario-usuario select,
-    .formulario-usuario option,
-    .formulario-usuario h2 {
-        color: white !important;
-    }
+        .formulario-usuario label,
+        .formulario-usuario input,
+        .formulario-usuario select,
+        .formulario-usuario option,
+        .formulario-usuario h2 {
+            color: white !important;
+        }
 
-    .formulario-usuario input,
-    .formulario-usuario select {
-        background-color: rgba(255,255,255,0.1) !important;
-        color: white !important;
-        border: 1px solid #ddd !important;
-    }
-</style>
+        .formulario-usuario input,
+        .formulario-usuario select {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+            border: 1px solid #ddd !important;
+        }
+
+        .formulario-usuario input::placeholder {
+            color: #e0e0e0 !important;
+        }
+    </style>
 
     <br>
 
