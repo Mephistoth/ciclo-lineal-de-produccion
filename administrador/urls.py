@@ -9,7 +9,7 @@ from .views import homeAdmin, home_empresa, tablasExtraccion, entradasExtraccion
                 areasUso, graficosUso, areasFin, graficosFin, ReporteExcel, ReporteExcelSalida, ReporteExcelOportunidades, ReporteExcelEntradaDiseño, ReporteExcelSalidaDiseño, ReporteExcelOportunidadDiseño, \
                 ReporteExcelEntradaLogistica, ReporteExcelSalidaLogistica, ReporteExcelOportunidadLogistica, ReporteExcelEntradaCompra, ReporteExcelSalidaCompra, ReporteExcelOportunidadCompra, \
                 ReporteExcelEntradaUso, ReporteExcelSalidaUso, ReporteExcelOportunidadUso, ReporteExcelEntradaFin, ReporteExcelSalidaFin, ReporteExcelOportunidadFin, log_telegan, ia_semantica, descargar_resumen, \
-                procesamiento_area, procesamiento_ideas, home_procesamiento, procesamiento_aempresa, admin_usuarios, editar_usuario, eliminar_usuario, resetear_clave, crear_usuario
+                procesamiento_area, procesamiento_ideas, home_procesamiento, procesamiento_aempresa, admin_usuarios, editar_usuario, eliminar_usuario, resetear_clave, crear_usuario, notificaciones, enviar_recordatorio_view
 
 urlpatterns = [
     path('home_admin', homeAdmin, name='home_admin'),
@@ -24,6 +24,8 @@ urlpatterns = [
     path('usuarios/eliminar/<int:id>/', eliminar_usuario, name='eliminar_usuario'),
     path('usuarios/resetear/<int:user_id>/', resetear_clave, name='resetear_clave'),
     path("usuarios/crear/", crear_usuario, name="crear_usuario"),
+    path("notificaciones/", notificaciones, name="notificaciones"),
+    path("notificaciones/enviar/<int:id_empresa>/", enviar_recordatorio_view, name="enviar_recordatorio"),
 
 
     #Graficos

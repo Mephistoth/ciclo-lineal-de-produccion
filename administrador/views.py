@@ -5089,3 +5089,80 @@ def crear_usuario(request):
         "areas": areas,
         "empresa_id": empresa_id
     })
+
+def obtener_usuarios_sin_actividad(id_empresa):
+    # todas las áreas de esa empresa
+    areas_ids = AreaEmpresa.objects.filter(id_empresa=id_empresa).values_list('id_area', flat=True)
+
+    # usuarios asociados a esas áreas
+    usuarios_ids = RegistroTrabajador.objects.filter(
+        id_area__in=areas_ids
+    ).values_list("usuario_id", flat=True)
+
+    # usuarios sin actividad (no registraron NADA)
+    usuarios_sin_act = Usuario.objects.filter(id__in=usuarios_ids)\
+        .exclude(id__in=Entrada.objects.values_list("usuario_id", flat=True))\
+        .exclude(id__in=Salida.objects.values_list("usuario_id", flat=True))\
+        .exclude(id__in=Oportunidades.objects.values_list("usuario_id", flat=True))
+
+    return usuarios_sin_act
+
+def notificaciones(request):
+    empresas = AreaEmpresa.objects.values("id_empresa__id_empresa", "id_empresa__nombre").distinct()
+
+    empresa_id = request.GET.get("empresa")
+    usuarios_faltantes = []
+
+    if empresa_id:
+        usuarios_faltantes = obtener_usuarios_sin_actividad(empresa_id)
+
+    context = {
+        "empresas": empresas,
+        "empresa_id": empresa_id,
+        "usuarios_faltantes": usuarios_faltantes,
+    }
+
+    return render(request, "notificaciones/notificaciones.html", context)
+
+def enviar_recordatorio_view(request, id_empresa):
+
+    # 1) Obtener usuarios sin actividad
+    usuarios = obtener_usuarios_sin_actividad(id_empresa)
+
+    # 2) Si no faltan usuarios, volver con mensaje
+    if not usuarios.exists():
+        messages.warning(
+            request,
+            "Todos los usuarios ya han respondido. No hay faltantes."
+        )
+        return redirect(f"/administrador/notificaciones/?empresa={id_empresa}")
+
+    enviados = 0
+
+    # 3) Enviar correo a cada usuario
+    for u in usuarios:
+        if not u.email:
+            continue
+
+        try:
+            send_mail(
+                subject="Recordatorio — Lineal a Circular",
+                message=(
+                    f"Hola {u.first_name or u.username},\n\n"
+                    "Te recordamos completar tus respuestas de Entradas, "
+                    "Salidas y Oportunidades.\n\n"
+                    "Gracias,\nEquipo Ciclo Circular."
+                ),
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[u.email],  # correo individual
+                fail_silently=False,
+            )
+            enviados += 1
+        except Exception as e:
+            print(f"Error enviando a {u.email}: {e}")
+
+    # 4) Mensaje de éxito
+    messages.success(request, f"Emails enviados correctamente: {enviados}")
+
+    # 5) Volver a notificaciones con la misma empresa filtrada
+    return redirect(f"/administrador/notificaciones/?empresa={id_empresa}")
