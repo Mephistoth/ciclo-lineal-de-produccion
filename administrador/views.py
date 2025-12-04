@@ -6,6 +6,7 @@ import docx
 import fitz
 import random
 import string
+import re
 from ast import Return
 from datetime import datetime
 from pipes import Template
@@ -5043,46 +5044,68 @@ def resetear_clave(request, user_id):
 
 
 def crear_usuario(request):
-    empresa_id = request.GET.get("empresa")  # recuperar empresa desde el botón
+    empresa_id = request.GET.get("empresa")
     areas = AreaEmpresa.objects.filter(id_empresa=empresa_id)
 
     if request.method == "POST":
-        username = request.POST.get("username")
-        nombre = request.POST.get("nombre")
-        apellido = request.POST.get("apellido")
-        email = request.POST.get("email")
-        telefono = request.POST.get("telefono")
+        username = request.POST.get("username", "").strip()
+        nombre = request.POST.get("nombre", "").strip()
+        apellido = request.POST.get("apellido", "").strip()
+        email = request.POST.get("email", "").strip()
+        telefono = request.POST.get("telefono", "").strip()
         area_id = request.POST.get("area")
 
-        # Usar tu función existente
+        errores = []
+
+        # Validación: campos obligatorios
+        if not username: errores.append("El username es obligatorio.")
+        if not nombre: errores.append("El nombre es obligatorio.")
+        if not apellido: errores.append("El apellido es obligatorio.")
+        if not email: errores.append("El email es obligatorio.")
+        if not telefono: errores.append("El teléfono es obligatorio.")
+        if not area_id: errores.append("Debes seleccionar un área.")
+
+        # Validación teléfono: 9 dígitos exactos
+        if telefono and not re.fullmatch(r"\d{9}", telefono):
+            errores.append("El teléfono debe tener exactamente 9 dígitos.")
+
+        # Si hay errores → no crear usuario
+        if errores:
+            for e in errores:
+                messages.error(request, e)
+
+            # Volver al formulario con errores
+            return render(request, "admin_usuarios/crear_usuario.html", {
+                "areas": areas,
+                "empresa_id": empresa_id
+            })
+
+        # Si está todo OK → crear usuario
         clave_temporal = generar_clave()
 
-        # Crear usuario
         usuario = Usuario.objects.create_user(
-                username,
-                nombre,
-                apellido,
-                telefono,
-                email,
-                clave_temporal
+            username,
+            nombre,
+            apellido,
+            telefono,
+            email,
+            clave_temporal
         )
 
-        # Crear registro trabajador
         RegistroTrabajador.objects.create(
             usuario=usuario,
             id_area_id=area_id,
             descripcion="Usuario recién creado"
         )
 
-        # Enviar email
         send_mail(
             subject="Tu cuenta ha sido creada",
             message=f"Hola {nombre}, tu clave temporal es: {clave_temporal}",
             from_email="no-reply@tuapp.com",
             recipient_list=[email],
-            fail_silently=False,
         )
 
+        messages.success(request, "Usuario creado correctamente.")
         return redirect(f"/administrador/usuarios?empresa={empresa_id}")
 
     return render(request, "admin_usuarios/crear_usuario.html", {

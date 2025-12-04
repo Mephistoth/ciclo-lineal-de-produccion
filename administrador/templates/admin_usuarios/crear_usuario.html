@@ -79,7 +79,7 @@
                 <!-- Teléfono -->
                 <div class="mb-3">
                     <label class="form-label">Teléfono</label>
-                    <input type="number" name="telefono" class="form-control">
+                    <input type="number" name="telefono" class="form-control" required>
                 </div>
 
                 <!-- Área -->
@@ -88,9 +88,9 @@
                     <select class="form-select" name="area" required>
                         <option value="" disabled selected>Seleccione...</option>
                         {% for area in areas %}
-                            <option value="{{ area.id_area }}">
-                                {{ area.nombre }} ({{ area.id_empresa.nombre }})
-                            </option>
+                        <option value="{{ area.id_area }}">
+                            {{ area.nombre }} ({{ area.id_empresa.nombre }})
+                        </option>
                         {% endfor %}
                     </select>
                 </div>
@@ -98,6 +98,16 @@
                 <!-- Botones -->
                 <button class="btn btn-success">Crear Usuario</button>
                 <a href="/administrador/usuarios?empresa={{ empresa_id }}" class="btn btn-secondary">Cancelar</a>
+
+                <div class="mt-3">
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} mt-2">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
 
             </form>
         </div>
@@ -114,4 +124,5 @@
     <script src="{% static 'js/main.js' %}"></script>
 
 </body>
+
 </html>
