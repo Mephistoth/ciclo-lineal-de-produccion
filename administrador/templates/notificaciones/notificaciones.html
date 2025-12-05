@@ -21,10 +21,8 @@
     <br>
 
     <div id="wrapper">
-
         <div class="container-sm" style="margin-bottom:auto;">
 
-            <!-- Solo admins -->
             {% if user.is_authenticated and user.is_staff %}
 
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -57,7 +55,7 @@
             {% if empresa_id %}
             <hr>
 
-            <!-- Botón enviar recordatorio -->
+            <!-- Botón enviar recordatorio a faltantes -->
             <div class="text-center mt-4">
                 <a href="{% url 'enviar_recordatorio' empresa_id %}" class="btn btn-outline-light no-hover-white"
                     style="padding:15px; font-size:20px; border: 2px solid">
@@ -73,6 +71,7 @@
                     border-color: #fff;
                 }
             </style>
+
             {% endif %}
 
             <br>
@@ -83,22 +82,34 @@
             </p>
             {% endif %}
 
+
+            {% if empresa_id %}
+            <div class="text-center mt-5">
+                <a href="{% url 'form_mensaje_todos' empresa_id %}" class="btn btn-outline-light no-hover-white"
+                    style="padding:15px; font-size:20px; border: 2px solid">
+                    ENVIAR EMAIL A TODOS LOS USUARIOS
+                </a>
+
+                <p class="text-center mt-2" style="color:white;">
+                    Total usuarios: {{ total_usuarios }}
+                </p>
+            </div>
+            {% endif %}
+
             <!-- MENSAJES -->
             {% if messages %}
             <div class="container mt-3">
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} text-center" role="alert">
-                        {{ message }}
-                    </div>
+                <div class="alert alert-{{ message.tags }} text-center" role="alert">
+                    {{ message }}
+                </div>
                 {% endfor %}
             </div>
             {% endif %}
-            <!-- FIN MENSAJES -->
 
             {% endif %}
 
         </div>
-
     </div>
 
     <div id="bg"></div>
@@ -110,6 +121,7 @@
     <script src="{% static 'js/breakpoints.min.js' %}"></script>
     <script src="{% static 'js/util.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
+
 </body>
 
 </html>

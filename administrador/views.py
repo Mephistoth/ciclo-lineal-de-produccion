@@ -16,6 +16,7 @@ from app.models import RegistroTrabajador, Etapa, Entrada, Salida, Oportunidades
 from user.models import Usuario
 from django.contrib.auth.hashers import make_password
 from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Count
@@ -5131,18 +5132,27 @@ def obtener_usuarios_sin_actividad(id_empresa):
     return usuarios_sin_act
 
 def notificaciones(request):
-    empresas = AreaEmpresa.objects.values("id_empresa__id_empresa", "id_empresa__nombre").distinct()
+    empresas = AreaEmpresa.objects.values(
+        "id_empresa__id_empresa",
+        "id_empresa__nombre"
+    ).distinct()
 
     empresa_id = request.GET.get("empresa")
     usuarios_faltantes = []
+    total_usuarios = []
 
     if empresa_id:
         usuarios_faltantes = obtener_usuarios_sin_actividad(empresa_id)
+
+        total_usuarios = Usuario.objects.filter(
+            registrotrabajador__id_area__id_empresa=empresa_id
+        ).distinct().count()
 
     context = {
         "empresas": empresas,
         "empresa_id": empresa_id,
         "usuarios_faltantes": usuarios_faltantes,
+        "total_usuarios": total_usuarios,
     }
 
     return render(request, "notificaciones/notificaciones.html", context)
@@ -5189,3 +5199,42 @@ def enviar_recordatorio_view(request, id_empresa):
 
     # 5) Volver a notificaciones con la misma empresa filtrada
     return redirect(f"/administrador/notificaciones/?empresa={id_empresa}")
+
+
+def enviar_mensaje_todos(request, id_empresa):
+    if request.method == "POST":
+        mensaje = request.POST.get("mensaje")
+        archivo = request.FILES.get("archivo")
+
+        # Obtener usuarios de la empresa (por los registros)
+        usuarios = Usuario.objects.filter(registrotrabajador__id_area__id_empresa=id_empresa).distinct()
+
+        enviados = 0
+
+        for u in usuarios:
+            if u.email:
+
+                email = EmailMessage(
+                    subject="Mensaje de la empresa",
+                    body=mensaje,
+                    from_email=settings.EMAIL_HOST_USER,
+                    to=[u.email],
+                )
+
+                # Si hay archivo adjunto
+                if archivo:
+                    email.attach(archivo.name, archivo.read(), archivo.content_type)
+
+                try:
+                    email.send()
+                    enviados += 1
+                except Exception as e:
+                    print("Error enviando a:", u.email, e)
+
+        messages.success(request, f"Mensaje enviado correctamente a {enviados} usuarios.")
+        return redirect(f"/administrador/notificaciones/?empresa={id_empresa}")
+
+def form_mensaje_todos(request, id_empresa):
+    return render(request, "notificaciones/form_mensaje_todos.html", {
+        "id_empresa": id_empresa
+    })

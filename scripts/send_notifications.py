@@ -6,7 +6,6 @@ import django
 # CONFIGURAR DJANGO
 # ==========================================
 
-# Ruta al proyecto (carpeta donde está manage.py)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
@@ -51,15 +50,14 @@ def obtener_usuarios_sin_actividad(id_empresa):
 # ENVÍO DE RECORDATORIOS
 # ==========================================
 
-def enviar_recordatorios_panaderia():
-    ID_PANADERIA = 1
+def enviar_recordatorios(id_empresa):
 
-    print("Buscando usuarios sin actividad...")
+    print(f"Buscando usuarios sin actividad en empresa ID {id_empresa}...")
 
-    usuarios = obtener_usuarios_sin_actividad(ID_PANADERIA)
+    usuarios = obtener_usuarios_sin_actividad(id_empresa)
 
     if not usuarios.exists():
-        print("No hay usuarios faltantes en PANADERIA.")
+        print("No hay usuarios faltantes.")
         return
 
     enviados = 0
@@ -82,11 +80,18 @@ def enviar_recordatorios_panaderia():
                 fail_silently=False,
             )
             enviados += 1
+
         except Exception as e:
             print(f"Error enviando a {u.email}: {e}")
 
     print(f"Emails enviados correctamente: {enviados}")
 
 
+# ==========================================
+# EJECUCIÓN PRINCIPAL
+# ==========================================
+
 if __name__ == "__main__":
-    enviar_recordatorios_panaderia()
+    # Aquí puedes cambiar la empresa cuando quieras:
+    id_empresa = 1  
+    enviar_recordatorios(id_empresa)
