@@ -5238,3 +5238,79 @@ def form_mensaje_todos(request, id_empresa):
     return render(request, "notificaciones/form_mensaje_todos.html", {
         "id_empresa": id_empresa
     })
+
+def menu_notificaciones(request):
+    return render(request, "notificaciones/menu_notificaciones.html")
+
+def notificaciones_comuna(request):
+
+    # Obtener SOLO comunas de usuarios NO admin
+    comunas = (
+        RegistroTrabajador.objects
+        .filter(usuario__is_staff=False)
+        .values_list("id_area__comuna", flat=True)
+        .distinct()
+    )
+
+    comuna_seleccionada = request.GET.get("comuna")
+
+    total_usuarios = 0
+
+    if comuna_seleccionada:
+        total_usuarios = (
+            Usuario.objects
+            .filter(registrotrabajador__id_area__comuna=comuna_seleccionada,
+                    is_staff=False)
+            .distinct()
+            .count()
+        )
+
+    context = {
+        "comunas": comunas,
+        "comuna_seleccionada": comuna_seleccionada,
+        "total_usuarios": total_usuarios,
+    }
+
+    return render(request, "notificaciones/notificaciones_comuna.html", context)
+
+
+def form_mensaje_comuna(request, comuna):
+    return render(request, "notificaciones/form_mensaje_comuna.html", {
+        "comuna": comuna
+    })
+
+def enviar_mensaje_comuna(request, comuna):
+    if request.method == "POST":
+        mensaje = request.POST.get("mensaje")
+        archivo = request.FILES.get("archivo")
+
+        # Filtrar usuarios por comuna
+        usuarios = Usuario.objects.filter(
+            registrotrabajador__id_area__comuna=comuna,
+            is_staff=False
+        ).distinct()
+
+        enviados = 0
+
+        for u in usuarios:
+            if not u.email:
+                continue
+
+            email = EmailMessage(
+                subject=f"Mensaje para usuarios de {comuna}",
+                body=mensaje,
+                from_email=settings.EMAIL_HOST_USER,
+                to=[u.email],
+            )
+
+            if archivo:
+                email.attach(archivo.name, archivo.read(), archivo.content_type)
+
+            try:
+                email.send()
+                enviados += 1
+            except Exception as e:
+                print("Error:", u.email, e)
+
+        messages.success(request, f"Mensaje enviado a {enviados} usuarios de {comuna}.")
+        return redirect("/administrador/notificaciones/comuna/")

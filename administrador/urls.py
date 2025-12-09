@@ -10,7 +10,7 @@ from .views import homeAdmin, home_empresa, tablasExtraccion, entradasExtraccion
                 ReporteExcelEntradaLogistica, ReporteExcelSalidaLogistica, ReporteExcelOportunidadLogistica, ReporteExcelEntradaCompra, ReporteExcelSalidaCompra, ReporteExcelOportunidadCompra, \
                 ReporteExcelEntradaUso, ReporteExcelSalidaUso, ReporteExcelOportunidadUso, ReporteExcelEntradaFin, ReporteExcelSalidaFin, ReporteExcelOportunidadFin, log_telegan, ia_semantica, descargar_resumen, \
                 procesamiento_area, procesamiento_ideas, home_procesamiento, procesamiento_aempresa, admin_usuarios, editar_usuario, eliminar_usuario, resetear_clave, crear_usuario, notificaciones, \
-                enviar_recordatorio_view, enviar_mensaje_todos, form_mensaje_todos
+                enviar_recordatorio_view, enviar_mensaje_todos, form_mensaje_todos, menu_notificaciones, notificaciones_comuna, form_mensaje_comuna, enviar_mensaje_comuna
 
 urlpatterns = [
     path('home_admin', homeAdmin, name='home_admin'),
@@ -26,9 +26,14 @@ urlpatterns = [
     path('usuarios/resetear/<int:user_id>/', resetear_clave, name='resetear_clave'),
     path("usuarios/crear/", crear_usuario, name="crear_usuario"),
     path("notificaciones/", notificaciones, name="notificaciones"),
+    path("notificaciones/opciones/", menu_notificaciones, name="menu_notificaciones"),
     path("notificaciones/enviar/<int:id_empresa>/", enviar_recordatorio_view, name="enviar_recordatorio"),
     path("notificaciones/enviar_todos/<int:id_empresa>/", enviar_mensaje_todos, name="enviar_mensaje_todos"),
     path("notificaciones/mensaje-todos/<int:id_empresa>/", form_mensaje_todos, name="form_mensaje_todos"),
+    path("notificaciones/comuna/", notificaciones_comuna, name="notificaciones_comuna"),
+    path("notificaciones/comuna/<str:comuna>/form/", form_mensaje_comuna, name="form_mensaje_comuna"),
+    path("notificaciones/comuna/<str:comuna>/enviar/", enviar_mensaje_comuna, name="enviar_mensaje_comuna"),
+
 
 
     #Graficos
