@@ -123,7 +123,27 @@ class Idea(models.Model):
         return f"Idea de {self.usuario} en {self.empresa.nombre} (Etapa: {self.etapa.nombre})"
 
 
+class CVUsuario(models.Model):
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    # Archivo almacenado en la BD como BLOB
+    archivo = models.BinaryField()  
+    nombre_archivo = models.CharField(max_length=255)
 
+    # 10 palabras clave generadas por ChatGPT
+    palabra1 = models.CharField(max_length=200, null=True, blank=True)
+    palabra2 = models.CharField(max_length=200, null=True, blank=True)
+    palabra3 = models.CharField(max_length=200, null=True, blank=True)
+    palabra4 = models.CharField(max_length=200, null=True, blank=True)
+    palabra5 = models.CharField(max_length=200, null=True, blank=True)
+    palabra6 = models.CharField(max_length=200, null=True, blank=True)
+    palabra7 = models.CharField(max_length=200, null=True, blank=True)
+    palabra8 = models.CharField(max_length=200, null=True, blank=True)
+    palabra9 = models.CharField(max_length=200, null=True, blank=True)
+    palabra10 = models.CharField(max_length=200, null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"CV de {self.usuario.username} ({self.timestamp})"
 
 
 

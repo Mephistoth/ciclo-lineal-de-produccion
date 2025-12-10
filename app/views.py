@@ -1,15 +1,22 @@
 from email import message
 from time import process_time_ns
 from django.shortcuts import get_object_or_404, redirect, render
-from .models import AreaEmpresa, Entrada, Etapa, RegistroTrabajador, Salida, Oportunidades, Empresa, Idea
+from .models import AreaEmpresa, Entrada, Etapa, RegistroTrabajador, Salida, Oportunidades, Empresa, Idea, CVUsuario
 from django.contrib import messages
 from .forms import EntradaForm, SalidaForm, OportunidadForm
 from user.models import Usuario
 from wordcloud import WordCloud
+from django.conf import settings
+from openai import OpenAI
 import matplotlib.pyplot as plt
 from django.http import HttpResponse
-from io import BytesIO
+import os
+import io
 import base64
+import fitz  # PyMuPDF
+import docx
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 
 # Create your views here.
 def home(request):
@@ -958,3 +965,118 @@ def ingresar_ideas(request, etapa_id=None):
         'etapa': etapa,
         'mensaje': mensaje
     })
+
+def mi_perfil(request):
+    registros = RegistroTrabajador.objects.filter(usuario=request.user)
+
+    return render(request, 'mi_perfil/mi_perfil.html', {
+        "registros": registros
+    })
+
+def subir_cv(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+
+    usuario = request.user
+
+    if request.method == "POST":
+
+        archivo = request.FILES.get("archivo")
+        if not archivo:
+            messages.error(request, "No se subió ningún archivo.")
+            return redirect("subir_cv")
+
+        # Convertir archivo a bytes
+        file_bytes = archivo.read()
+
+        # Crear file-like
+        file_like = io.BytesIO(file_bytes)
+        file_like.name = archivo.name
+
+        texto = leer_archivo(file_like)
+
+        # Generar 10 palabras clave
+        try:
+            palabras = generar_10_palabras_clave(texto)
+        except Exception as e:
+            print(f"ERROR GENERANDO PALABRAS CLAVE: {e}")
+            messages.error(request, f"Error al generar palabras clave: {e}")
+            palabras = [None] * 10
+
+        # Mantener solo 1 CV por usuario
+        CVUsuario.objects.filter(usuario=usuario).delete()
+
+        obj = CVUsuario.objects.create(
+            usuario=usuario,
+            archivo=file_bytes,
+            nombre_archivo=archivo.name,
+            palabra1=palabras[0],
+            palabra2=palabras[1],
+            palabra3=palabras[2],
+            palabra4=palabras[3],
+            palabra5=palabras[4],
+            palabra6=palabras[5],
+            palabra7=palabras[6],
+            palabra8=palabras[7],
+            palabra9=palabras[8],
+            palabra10=palabras[9],
+        )
+
+
+        messages.success(request, "CV subido y procesado correctamente.")
+        return redirect("mi_perfil")
+
+    return render(request, "mi_perfil/subir_cv.html")
+
+def leer_archivo(file_like):
+    ext = file_like.name.split(".")[-1].lower()
+
+    try:
+        if ext == "txt":
+            return file_like.read().decode("utf-8", errors="ignore")
+
+        elif ext == "docx":
+            doc = docx.Document(file_like)
+            return "\n".join([p.text for p in doc.paragraphs])
+
+        elif ext == "pdf":
+            file_like.seek(0)
+            texto = ""
+            with fitz.open(stream=file_like.read(), filetype="pdf") as pdf:
+                for pagina in pdf:
+                    texto += pagina.get_text()
+            return texto
+
+    except Exception as e:
+        return f"Error al leer archivo: {e}"
+
+    return ""
+
+def generar_10_palabras_clave(texto):
+
+    completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": "Devuelve SOLO una lista de 10 palabras clave, separadas por comas."
+            },
+            {
+                "role": "user",
+                "content": f"Extrae exactamente 10 palabras clave del siguiente texto. Respóndelas separadas por comas.\n\n{texto[:3500]}"
+            }
+        ]
+    )
+
+    # IMPORTANTE: acceso correcto al mensaje
+    content = completion.choices[0].message.content
+
+    # Procesar palabras
+    palabras = [p.strip() for p in content.replace("\n", ",").split(",") if p.strip()]
+
+    # asegurar 10
+    palabras = palabras[:10]
+    while len(palabras) < 10:
+        palabras.append(None)
+
+    return palabras

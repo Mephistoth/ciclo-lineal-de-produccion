@@ -67,16 +67,6 @@
                 <!--<li><a href="#elements">Elements</a></li>-->
             </nav>
 
-            <nav>
-                <ul style="margin-top: -20px;">
-                    {% if user.is_authenticated %}
-                    <li><a href="{% url 'logout' %}">Cerrar Sesion</a></li>
-                    {% else %}
-                    <li><a href="{% url 'login' %}">inicia Sesion</a></li>
-                    {% endif %}
-                </ul>
-            </nav>
-
             <nav style="margin-top: 20px;">
                 <ul>
                     {% if not user.is_staff %}
@@ -90,7 +80,26 @@
                     {% endif %}
                     <!--<li><a href="#elements">Elements</a></li>-->
                 </ul>
+                <ul style="margin-top: 10px;">
+                    {% if user.is_authenticated and not user.is_staff %}
+                    <li><a style="padding-left: 80px;padding-right: 73px;" href="{% url 'mi_perfil' %}">Mis Datos</a>
+                    </li>
+                    {% endif %}
+                    <!--<li><a href="#elements">Elements</a></li>-->
+                </ul>
             </nav>
+
+            <nav>
+                <ul style="margin-top: -20px;">
+                    {% if user.is_authenticated %}
+                    <li><a href="{% url 'logout' %}">Cerrar Sesion</a></li>
+                    {% else %}
+                    <li><a href="{% url 'login' %}">inicia Sesion</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+            
         </header>
 
 

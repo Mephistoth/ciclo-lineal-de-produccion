@@ -61,5 +61,9 @@ urlpatterns = [
 
     #ideas
     path('ideas/', ingresar_ideas, name="ingresar_ideas"),
-    path('ideas/<int:etapa_id>/', ingresar_ideas, name='ingresar_idea')
+    path('ideas/<int:etapa_id>/', ingresar_ideas, name='ingresar_idea'),
+
+    #datos de usuario
+    path('mi_perfil', mi_perfil, name="mi_perfil"),
+    path('mi-cv/', subir_cv, name='subir_cv'),
 ]
