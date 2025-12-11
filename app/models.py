@@ -126,7 +126,7 @@ class Idea(models.Model):
 class CVUsuario(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     # Archivo almacenado en la BD como BLOB
-    archivo = models.BinaryField()  
+    archivo = models.TextField()
     nombre_archivo = models.CharField(max_length=255)
 
     # 10 palabras clave generadas por ChatGPT

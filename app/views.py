@@ -980,19 +980,18 @@ def subir_cv(request):
     usuario = request.user
 
     if request.method == "POST":
-
         archivo = request.FILES.get("archivo")
         if not archivo:
             messages.error(request, "No se subió ningún archivo.")
             return redirect("subir_cv")
 
-        # Convertir archivo a bytes
+        # Leer archivo y convertir a Base64
         file_bytes = archivo.read()
+        file_base64 = base64.b64encode(file_bytes).decode("utf-8")
 
-        # Crear file-like
+        # Crear file-like para extraer texto
         file_like = io.BytesIO(file_bytes)
         file_like.name = archivo.name
-
         texto = leer_archivo(file_like)
 
         # Generar 10 palabras clave
@@ -1006,9 +1005,10 @@ def subir_cv(request):
         # Mantener solo 1 CV por usuario
         CVUsuario.objects.filter(usuario=usuario).delete()
 
-        obj = CVUsuario.objects.create(
+        # Guardar en BD
+        CVUsuario.objects.create(
             usuario=usuario,
-            archivo=file_bytes,
+            archivo=file_base64,
             nombre_archivo=archivo.name,
             palabra1=palabras[0],
             palabra2=palabras[1],
@@ -1021,7 +1021,6 @@ def subir_cv(request):
             palabra9=palabras[8],
             palabra10=palabras[9],
         )
-
 
         messages.success(request, "CV subido y procesado correctamente.")
         return redirect("mi_perfil")
