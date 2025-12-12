@@ -987,7 +987,6 @@ def subir_cv(request):
 
         # Leer archivo y convertir a Base64
         file_bytes = archivo.read()
-        file_base64 = base64.b64encode(file_bytes).decode("utf-8")
 
         # Crear file-like para extraer texto
         file_like = io.BytesIO(file_bytes)
@@ -1008,7 +1007,7 @@ def subir_cv(request):
         # Guardar en BD
         CVUsuario.objects.create(
             usuario=usuario,
-            archivo=file_base64,
+            archivo=file_bytes,
             nombre_archivo=archivo.name,
             palabra1=palabras[0],
             palabra2=palabras[1],
