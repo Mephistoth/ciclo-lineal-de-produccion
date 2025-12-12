@@ -10,7 +10,7 @@ from .views import homeAdmin, home_empresa, tablasExtraccion, entradasExtraccion
                 ReporteExcelEntradaLogistica, ReporteExcelSalidaLogistica, ReporteExcelOportunidadLogistica, ReporteExcelEntradaCompra, ReporteExcelSalidaCompra, ReporteExcelOportunidadCompra, \
                 ReporteExcelEntradaUso, ReporteExcelSalidaUso, ReporteExcelOportunidadUso, ReporteExcelEntradaFin, ReporteExcelSalidaFin, ReporteExcelOportunidadFin, log_telegan, ia_semantica, descargar_resumen, \
                 procesamiento_area, procesamiento_ideas, home_procesamiento, procesamiento_aempresa, admin_usuarios, editar_usuario, eliminar_usuario, resetear_clave, crear_usuario, notificaciones, \
-                enviar_recordatorio_view, enviar_mensaje_todos, form_mensaje_todos, menu_notificaciones, notificaciones_comuna, form_mensaje_comuna, enviar_mensaje_comuna, ver_cv, descargar_cv
+                enviar_recordatorio_view, enviar_mensaje_todos, form_mensaje_todos, menu_notificaciones, notificaciones_comuna, form_mensaje_comuna, enviar_mensaje_comuna, ver_cv, descargar_cv, procesamiento_palabra_clave
 
 urlpatterns = [
     path('home_admin', homeAdmin, name='home_admin'),
@@ -20,6 +20,7 @@ urlpatterns = [
     path('procesamiento_ideas', procesamiento_ideas, name='procesamiento_ideas'),
     path('procesamiento/', home_procesamiento, name='home_procesamiento'),
     path('procesamiento_aempresa', procesamiento_aempresa, name='procesamiento_aempresa'),
+    path('procesamiento_palabra_clave', procesamiento_palabra_clave, name='procesamiento_palabra_clave'),
     #admin usuarios
     path('usuarios/', admin_usuarios, name='admin_usuarios'),
     path("usuarios/editar/<int:user_id>/", editar_usuario, name="editar_usuario"),
@@ -149,5 +150,7 @@ urlpatterns = [
     path('procesamiento_area/<int:id_empresa>/', procesamiento_area, name="procesamiento_area_empresa"),
 
     path('procesamiento_ideas/<int:id_empresa>/', procesamiento_ideas, name='procesamiento_ideas_empresa'),
+
+
     
 ]

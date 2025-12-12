@@ -5346,3 +5346,66 @@ def descargar_cv(request, cv_id):
     response = HttpResponse(archivo_bytes, content_type='application/octet-stream')
     response['Content-Disposition'] = f'attachment; filename="{cv.nombre_archivo}"'
     return response
+
+def procesamiento_palabra_clave(request):
+    empresas = Empresa.objects.all()
+
+    empresa_id = request.GET.get("empresa")
+    empresa_seleccionada = None
+    usuarios = []
+    matriz = []
+    matriz_con_usuarios = []
+
+    if empresa_id:
+        empresa_seleccionada = Empresa.objects.get(id_empresa=empresa_id)
+
+        # Usuarios de la empresa con CV
+        usuarios = Usuario.objects.filter(
+            registrotrabajador__id_area__id_empresa__id_empresa=empresa_id,
+            cvusuario__isnull=False
+        ).distinct()
+
+        if request.method == "POST":
+
+            # Extraer palabras clave por usuario
+            lista_palabras = []
+            for usr in usuarios:
+                cv = CVUsuario.objects.filter(usuario=usr).first()
+
+                if cv:
+                    palabras = [
+                        cv.palabra1, cv.palabra2, cv.palabra3, cv.palabra4, cv.palabra5,
+                        cv.palabra6, cv.palabra7, cv.palabra8, cv.palabra9, cv.palabra10
+                    ]
+                    palabras = [p.strip().lower() for p in palabras if p]
+                else:
+                    palabras = []
+
+                lista_palabras.append(palabras)
+
+            tamaño = len(usuarios)
+
+            # Crear matriz vacía NxN
+            matriz = [[0] * tamaño for _ in range(tamaño)]
+
+            # Calcular coincidencias
+            for i in range(tamaño):
+                for j in range(tamaño):
+
+                    # Diagonal siempre vale 10
+                    if i == j:
+                        matriz[i][j] = 10
+                        continue
+
+                    coincidencias = len(set(lista_palabras[i]) & set(lista_palabras[j]))
+                    matriz[i][j] = coincidencias
+
+            # Emparejar usuarios con su fila de la matriz
+            matriz_con_usuarios = list(zip(usuarios, matriz))
+
+    return render(request, 'procesamiento_palabra_clave/procesamiento_palabra_clave.html', {
+        "empresas": empresas,
+        "empresa_seleccionada": empresa_seleccionada,
+        "usuarios": usuarios,
+        "matriz_con_usuarios": matriz_con_usuarios,
+    })
