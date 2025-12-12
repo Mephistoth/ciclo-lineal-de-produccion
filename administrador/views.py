@@ -12,7 +12,7 @@ from datetime import datetime
 from pipes import Template
 from urllib import request
 from django.shortcuts import render, redirect, get_object_or_404
-from app.models import RegistroTrabajador, Etapa, Entrada, Salida, Oportunidades, Empresa, AreaEmpresa, Idea
+from app.models import RegistroTrabajador, Etapa, Entrada, Salida, Oportunidades, Empresa, AreaEmpresa, Idea, CVUsuario
 from user.models import Usuario
 from django.contrib.auth.hashers import make_password
 from django.core.mail import send_mail
@@ -5314,3 +5314,35 @@ def enviar_mensaje_comuna(request, comuna):
 
         messages.success(request, f"Mensaje enviado a {enviados} usuarios de {comuna}.")
         return redirect("/administrador/notificaciones/comuna/")
+
+
+def ver_cv(request, user_id):
+    usuario = get_object_or_404(Usuario, id=user_id)
+    cv = usuario.cvusuario_set.first()
+
+    palabras = []
+    if cv:
+        palabras = [
+            cv.palabra1, cv.palabra2, cv.palabra3, cv.palabra4, cv.palabra5,
+            cv.palabra6, cv.palabra7, cv.palabra8, cv.palabra9, cv.palabra10,
+        ]
+        # Filtramos los None o cadenas vacías
+        palabras = [p for p in palabras if p]
+
+    return render(request, 'admin_usuarios/ver_cv.html', {
+        'usuario': usuario,
+        'cv': cv,
+        'palabras': palabras,
+    })
+
+def descargar_cv(request, cv_id):
+    cv = get_object_or_404(CVUsuario, id=cv_id)
+    # Convertir Base64 a bytes si está almacenado así
+    try:
+        archivo_bytes = base64.b64decode(cv.archivo)
+    except Exception:
+        archivo_bytes = cv.archivo  # si está en bytes puro
+
+    response = HttpResponse(archivo_bytes, content_type='application/octet-stream')
+    response['Content-Disposition'] = f'attachment; filename="{cv.nombre_archivo}"'
+    return response

@@ -10,7 +10,7 @@ from .views import homeAdmin, home_empresa, tablasExtraccion, entradasExtraccion
                 ReporteExcelEntradaLogistica, ReporteExcelSalidaLogistica, ReporteExcelOportunidadLogistica, ReporteExcelEntradaCompra, ReporteExcelSalidaCompra, ReporteExcelOportunidadCompra, \
                 ReporteExcelEntradaUso, ReporteExcelSalidaUso, ReporteExcelOportunidadUso, ReporteExcelEntradaFin, ReporteExcelSalidaFin, ReporteExcelOportunidadFin, log_telegan, ia_semantica, descargar_resumen, \
                 procesamiento_area, procesamiento_ideas, home_procesamiento, procesamiento_aempresa, admin_usuarios, editar_usuario, eliminar_usuario, resetear_clave, crear_usuario, notificaciones, \
-                enviar_recordatorio_view, enviar_mensaje_todos, form_mensaje_todos, menu_notificaciones, notificaciones_comuna, form_mensaje_comuna, enviar_mensaje_comuna
+                enviar_recordatorio_view, enviar_mensaje_todos, form_mensaje_todos, menu_notificaciones, notificaciones_comuna, form_mensaje_comuna, enviar_mensaje_comuna, ver_cv, descargar_cv
 
 urlpatterns = [
     path('home_admin', homeAdmin, name='home_admin'),
@@ -20,11 +20,16 @@ urlpatterns = [
     path('procesamiento_ideas', procesamiento_ideas, name='procesamiento_ideas'),
     path('procesamiento/', home_procesamiento, name='home_procesamiento'),
     path('procesamiento_aempresa', procesamiento_aempresa, name='procesamiento_aempresa'),
+    #admin usuarios
     path('usuarios/', admin_usuarios, name='admin_usuarios'),
     path("usuarios/editar/<int:user_id>/", editar_usuario, name="editar_usuario"),
     path('usuarios/eliminar/<int:id>/', eliminar_usuario, name='eliminar_usuario'),
     path('usuarios/resetear/<int:user_id>/', resetear_clave, name='resetear_clave'),
     path("usuarios/crear/", crear_usuario, name="crear_usuario"),
+    #cv usuarios
+    path('usuarios/cv/<int:user_id>/', ver_cv, name='ver_cv'),
+    path('usuarios/cv/descargar/<int:cv_id>/', descargar_cv, name='descargar_cv'),
+    #notificaciones
     path("notificaciones/", notificaciones, name="notificaciones"),
     path("notificaciones/opciones/", menu_notificaciones, name="menu_notificaciones"),
     path("notificaciones/enviar/<int:id_empresa>/", enviar_recordatorio_view, name="enviar_recordatorio"),
@@ -91,7 +96,7 @@ urlpatterns = [
     path('oportunidad_uso', oportunidadUsoConsumo, name='oportunidad_uso'),
     path('home_frecuencia_uso/<id>/', homeFrecuenciaUso, name='home_frecuencia_uso'),
     path('frecuencia_uso/<id>/', frecuenciaUso, name='frecuencia_uso'),
-    path('areas_uso/<id>/', areasUso, name = 'areas_uso'),
+     path('areas_uso/<id>/', areasUso, name = 'areas_uso'),
     path('graficos_uso/<id>/', graficosUso, name = 'graficos_uso' ),
     #fin de vida
     path('entrada_fin', entradaFin, name='entrada_fin'),

@@ -85,6 +85,12 @@
                         <!-- Botón modificar alineado a la derecha -->
                         <td>
 
+                            <form action="{% url 'ver_cv' registro.usuario.id %}" method="GET" style="display:inline;">
+                                <button class="btn btn-info btn-sm" style="width: 90px;">
+                                    CV
+                                </button>
+                            </form>
+
                             <!-- Botón Modificar (ahora como button) -->
                             <form action="{% url 'editar_usuario' registro.usuario.id %}" method="GET"
                                 style="display:inline;">
