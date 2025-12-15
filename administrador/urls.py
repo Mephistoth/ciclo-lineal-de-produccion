@@ -10,7 +10,8 @@ from .views import homeAdmin, home_empresa, tablasExtraccion, entradasExtraccion
                 ReporteExcelEntradaLogistica, ReporteExcelSalidaLogistica, ReporteExcelOportunidadLogistica, ReporteExcelEntradaCompra, ReporteExcelSalidaCompra, ReporteExcelOportunidadCompra, \
                 ReporteExcelEntradaUso, ReporteExcelSalidaUso, ReporteExcelOportunidadUso, ReporteExcelEntradaFin, ReporteExcelSalidaFin, ReporteExcelOportunidadFin, log_telegan, ia_semantica, descargar_resumen, \
                 procesamiento_area, procesamiento_ideas, home_procesamiento, procesamiento_aempresa, admin_usuarios, editar_usuario, eliminar_usuario, resetear_clave, crear_usuario, notificaciones, \
-                enviar_recordatorio_view, enviar_mensaje_todos, form_mensaje_todos, menu_notificaciones, notificaciones_comuna, form_mensaje_comuna, enviar_mensaje_comuna, ver_cv, descargar_cv, procesamiento_palabra_clave
+                enviar_recordatorio_view, enviar_mensaje_todos, form_mensaje_todos, menu_notificaciones, notificaciones_comuna, form_mensaje_comuna, enviar_mensaje_comuna, ver_cv, descargar_cv, procesamiento_palabra_clave ,\
+                asignar_coordinador, quitar_coordinador, panel_coordinador, registro
 
 urlpatterns = [
     path('home_admin', homeAdmin, name='home_admin'),
@@ -148,8 +149,13 @@ urlpatterns = [
 
     #procesamiento por area
     path('procesamiento_area/<int:id_empresa>/', procesamiento_area, name="procesamiento_area_empresa"),
-
     path('procesamiento_ideas/<int:id_empresa>/', procesamiento_ideas, name='procesamiento_ideas_empresa'),
+
+    #coordinadores
+    path('usuarios/asignar-coordinador/<int:empresa_id>/', asignar_coordinador, name='asignar_coordinador'),
+    path('usuarios/quitar-coordinador/<int:user_id>/', quitar_coordinador, name='quitar_coordinador'),
+    path('coordinador/', panel_coordinador, name='panel_coordinador'),
+    path('registro/', registro, name='registro'),
 
 
     

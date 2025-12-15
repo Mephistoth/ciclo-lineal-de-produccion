@@ -59,9 +59,11 @@
                     <li style="border-left: 1px solid white;"><a href="{% url 'log_telegram' %}">Log Telegram</a></li>
                     <li style="border-left: 1px solid white;"><a href="admin/">Admin Django</a></li>
                     <li style="border-left: 1px solid white;"><a href="{% url 'Home_api' %}">APIS</a></li>
-                    <li style="border-left: 1px solid white;"><a href="{% url 'home_procesamiento' %}">PROCESAMIENTO</a></li>
+                    <li style="border-left: 1px solid white;"><a href="{% url 'home_procesamiento' %}">PROCESAMIENTO</a>
+                    </li>
                     <li style="border-left: 1px solid white;"><a href="{% url 'admin_usuarios' %}">Usuarios</a></li>
-                    <li style="border-left: 1px solid white;"><a href="{% url 'menu_notificaciones' %}">Notificaciones</a></li>
+                    <li style="border-left: 1px solid white;"><a
+                            href="{% url 'menu_notificaciones' %}">Notificaciones</a></li>
                 </ul>
                 {% endif %}
                 <!--<li><a href="#elements">Elements</a></li>-->
@@ -87,6 +89,19 @@
                     {% endif %}
                     <!--<li><a href="#elements">Elements</a></li>-->
                 </ul>
+
+                <!-- ================== COORDINADOR ================== -->
+                {% if user.is_authenticated and user.empresa_coordinador %}
+                <ul style="margin-top: 10px;">
+                    <li>
+                        <a style="padding-left: 80px;padding-right: 73px; font-weight:bold;"
+                            href="{% url 'panel_coordinador' %}">
+                            COORDINADOR
+                        </a>
+                    </li>
+                </ul>
+                {% endif %}
+
             </nav>
 
             <nav>
@@ -99,7 +114,7 @@
                 </ul>
             </nav>
 
-            
+
         </header>
 
 

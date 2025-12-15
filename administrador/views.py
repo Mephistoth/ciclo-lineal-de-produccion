@@ -12,6 +12,7 @@ from datetime import datetime
 from pipes import Template
 from urllib import request
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import user_passes_test, login_required
 from app.models import RegistroTrabajador, Etapa, Entrada, Salida, Oportunidades, Empresa, AreaEmpresa, Idea, CVUsuario
 from user.models import Usuario
 from django.contrib.auth.hashers import make_password
@@ -4899,26 +4900,42 @@ def admin_usuarios(request):
 
     empresa_seleccionada = None
     usuarios_area = None
+    coordinador_empresa = None  # 👈 CLAVE
 
     if empresa_id:
         try:
             empresa_seleccionada = Empresa.objects.get(id_empresa=empresa_id)
 
             # Obtener las áreas de esa empresa
-            areas_empresa = AreaEmpresa.objects.filter(id_empresa=empresa_seleccionada)
+            areas_empresa = AreaEmpresa.objects.filter(
+                id_empresa=empresa_seleccionada
+            )
 
             # Obtener los trabajadores registrados en esas áreas
-            usuarios_area = RegistroTrabajador.objects.filter(id_area__in=areas_empresa)
+            usuarios_area = RegistroTrabajador.objects.filter(
+                id_area__in=areas_empresa
+            ).select_related("usuario", "id_area")
+
+            # 🔹 OBTENER COORDINADOR DE LA EMPRESA (SOLO 1)
+            coordinador_empresa = Usuario.objects.filter(
+                empresa_coordinador=empresa_seleccionada
+            ).first()
 
         except Empresa.DoesNotExist:
             empresa_seleccionada = None
             usuarios_area = None
+            coordinador_empresa = None
 
-    return render(request, "admin_usuarios/admin_usuarios.html", {
-        "empresas": empresas,
-        "empresa_seleccionada": empresa_seleccionada,
-        "usuarios_area": usuarios_area,
-    })
+    return render(
+        request,
+        "admin_usuarios/admin_usuarios.html",
+        {
+            "empresas": empresas,
+            "empresa_seleccionada": empresa_seleccionada,
+            "usuarios_area": usuarios_area,
+            "coordinador_empresa": coordinador_empresa,
+        }
+    )
 
 def editar_usuario(request, user_id):
     # Obtener usuario
@@ -5409,3 +5426,63 @@ def procesamiento_palabra_clave(request):
         "usuarios": usuarios,
         "matriz_con_usuarios": matriz_con_usuarios,
     })
+
+
+def es_super_admin(user):
+    return user.is_staff
+
+
+@user_passes_test(es_super_admin)
+def asignar_coordinador(request, empresa_id):
+    if request.method == "POST":
+        user_id = request.POST.get("user_id")
+
+        usuario = get_object_or_404(Usuario, id=user_id)
+        empresa = get_object_or_404(Empresa, id_empresa=empresa_id)
+
+        # 🔒 Solo 1 coordinador por empresa
+        Usuario.objects.filter(
+            empresa_coordinador=empresa
+        ).update(empresa_coordinador=None)
+
+        usuario.empresa_coordinador = empresa
+        usuario.save()
+
+    return redirect(request.META.get("HTTP_REFERER", "/"))
+
+
+@user_passes_test(es_super_admin)
+def quitar_coordinador(request, user_id):
+    usuario = get_object_or_404(Usuario, id=user_id)
+    usuario.empresa_coordinador = None
+    usuario.save()
+
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+@login_required
+def panel_coordinador(request):
+    usuario = request.user
+
+    # Validar que sea coordinador
+    if not usuario.empresa_coordinador:
+        return HttpResponseForbidden("No tienes permisos de coordinador")
+
+    empresa = usuario.empresa_coordinador
+
+    return render(request, "coordinador/panel_coordinador.html", {
+        "empresa": empresa,
+    })
+
+def registro(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    # Solo coordinadores pueden acceder
+    if not hasattr(request.user, 'empresa_coordinador') or not request.user.empresa_coordinador:
+        return redirect('home')  # o mostrar mensaje de "no tienes permisos"
+
+    empresa = request.user.empresa_coordinador
+    context = {
+        'empresa': empresa
+    }
+    return render(request, 'coordinador/registro.html', context)

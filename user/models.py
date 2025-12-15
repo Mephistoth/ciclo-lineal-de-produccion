@@ -33,6 +33,10 @@ class Usuario(AbstractUser):
     telefono = models.IntegerField(null=True)
     id_telegram = models.CharField(max_length=100, null=True, default=0)
 
+    empresa_coordinador = models.ForeignKey('app.Empresa',on_delete=models.SET_NULL,null=True,blank=True,
+        related_name='coordinadores'
+    )
+
     objects = UsuarioManager()
 
     def __str__(self):

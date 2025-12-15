@@ -28,20 +28,35 @@ def home(request):
         return render(request, 'home.html')
 
 def autoDiagnostico(request, empresa_id=None):
+
     if not request.user.is_authenticated:
         return render(request, 'autodiagnostico/auto_diagnostico.html')
 
-    empresas = Empresa.objects.all()  # para admins
+    empresas = Empresa.objects.all()  # Admin
     registros = RegistroTrabajador.objects.filter(usuario=request.user)
 
     empresa_seleccionada = None
-    if empresa_id:
-        empresa_seleccionada = Empresa.objects.get(id_empresa=empresa_id)
+    empresa_id_final = None
+
+    # ADMIN: empresa seleccionada por URL
+    if request.user.is_staff and empresa_id:
+        empresa_seleccionada = Empresa.objects.filter(id_empresa=empresa_id).first()
+        if empresa_seleccionada:
+            empresa_id_final = empresa_seleccionada.id_empresa
+
+    # COORDINADOR: empresa asignada
+    elif hasattr(request.user, 'empresa_coordinador') and request.user.empresa_coordinador:
+        empresa_id_final = request.user.empresa_coordinador.id_empresa
+
+    # USUARIO NORMAL: empresa desde su registro
+    elif registros.exists():
+        empresa_id_final = registros.first().id_area.id_empresa.id_empresa
 
     contexto = {
         'registros': registros,
         'empresas': empresas,
-        'empresa_seleccionada': empresa_seleccionada
+        'empresa_seleccionada': empresa_seleccionada,
+        'empresa_id': empresa_id_final,
     }
 
     return render(request, 'autodiagnostico/auto_diagnostico.html', contexto)
@@ -1078,3 +1093,4 @@ def generar_10_palabras_clave(texto):
         palabras.append(None)
 
     return palabras
+
