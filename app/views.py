@@ -44,10 +44,6 @@ def autoDiagnostico(request, empresa_id=None):
         if empresa_seleccionada:
             empresa_id_final = empresa_seleccionada.id_empresa
 
-    # COORDINADOR: empresa asignada
-    elif hasattr(request.user, 'empresa_coordinador') and request.user.empresa_coordinador:
-        empresa_id_final = request.user.empresa_coordinador.id_empresa
-
     # USUARIO NORMAL: empresa desde su registro
     elif registros.exists():
         empresa_id_final = registros.first().id_area.id_empresa.id_empresa

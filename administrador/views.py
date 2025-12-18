@@ -5477,12 +5477,30 @@ def registro(request):
     if not request.user.is_authenticated:
         return redirect('login')
 
-    # Solo coordinadores pueden acceder
-    if not hasattr(request.user, 'empresa_coordinador') or not request.user.empresa_coordinador:
-        return redirect('home')  # o mostrar mensaje de "no tienes permisos"
+    if not request.user.empresa_coordinador:
+        return redirect('home')
 
     empresa = request.user.empresa_coordinador
-    context = {
-        'empresa': empresa
+
+    etapa = request.GET.get('etapa')
+    tabla = request.GET.get('tabla')
+
+    MAPA_ETAPAS = {
+        'extraccion': 1,
+        'diseno': 2,
+        'logistica': 3,
+        'compra': 4,
+        'uso': 5,
+        'fin': 6,
     }
+
+    etapa_seleccionada = MAPA_ETAPAS.get(etapa)
+
+    context = {
+        'empresa': empresa,
+        'etapa': etapa,
+        'tabla': tabla,
+        'etapa_seleccionada': etapa_seleccionada,
+    }
+
     return render(request, 'coordinador/registro.html', context)
