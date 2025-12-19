@@ -32,11 +32,23 @@ class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
 
     #modelos que seran utilizados para mostrar el modelo de usuario
 
-    #list_display = ('email', 'username')
+    list_display = (
+        'username',
+        'email',
+        'first_name',
+        'last_name',
+        'is_staff',
+        'empresa_coordinador',   #  Nueva columna visible en la tabla
+    )
+
+    #  Método que mostrará la empresa en la tabla
+    def empresa_columna(self, obj):
+        return obj.empresa_coordinador.nombre if obj.empresa_coordinador else "—"
+
     list_filter = ('email',)
     fieldsets = (
         (None,{'fields': ('username','email', 'password', 'telefono')}),
-        ('Informacion personal', {'fields': ( 'first_name', 'last_name', 'id_telegram', 'empresa_coordinador')}),
+        ('Informacion personal', {'fields': ( 'first_name', 'last_name', 'id_telegram')}),
         ('Permisos Django', {'fields': ('is_staff', 'is_active')})
 
     )
