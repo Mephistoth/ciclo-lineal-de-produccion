@@ -5440,25 +5440,39 @@ def asignar_coordinador(request, empresa_id):
         usuario = get_object_or_404(Usuario, id=user_id)
         empresa = get_object_or_404(Empresa, id_empresa=empresa_id)
 
-        # 🔒 Solo 1 coordinador por empresa
+        # 1 solo coordinador por empresa
         Usuario.objects.filter(
             empresa_coordinador=empresa
-        ).update(empresa_coordinador=None)
+        ).update(
+            empresa_coordinador=None,
+            es_coordinador=False
+        )
 
+        # asignar el nuevo coordinador
         usuario.empresa_coordinador = empresa
+        usuario.es_coordinador = True
         usuario.save()
 
     return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
+# ============================================
+# QUITAR COORDINADOR
+# ============================================
 @user_passes_test(es_super_admin)
 def quitar_coordinador(request, user_id):
     usuario = get_object_or_404(Usuario, id=user_id)
+
     usuario.empresa_coordinador = None
+    usuario.es_coordinador = False
     usuario.save()
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
+
+# ============================================
+# PANEL DEL COORDINADOR
+# ============================================
 @login_required
 def panel_coordinador(request):
     usuario = request.user
@@ -5473,10 +5487,16 @@ def panel_coordinador(request):
         "empresa": empresa,
     })
 
+
+# ============================================
+# REGISTRO DEL COORDINADOR
+# ============================================
+@login_required
 def registro(request):
     if not request.user.is_authenticated:
         return redirect('login')
 
+    # Solo coordinador
     if not request.user.empresa_coordinador:
         return redirect('home')
 

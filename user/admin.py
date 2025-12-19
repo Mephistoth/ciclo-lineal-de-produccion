@@ -38,6 +38,7 @@ class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
         'first_name',
         'last_name',
         'is_staff',
+        'es_coordinador',
         'empresa_coordinador',   #  Nueva columna visible en la tabla
     )
 
@@ -49,7 +50,7 @@ class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
     fieldsets = (
         (None,{'fields': ('username','email', 'password', 'telefono')}),
         ('Informacion personal', {'fields': ( 'first_name', 'last_name', 'id_telegram')}),
-        ('Permisos Django', {'fields': ('is_staff', 'is_active')})
+        ('Permisos Django', {'fields': ('is_staff', 'is_active', 'es_coordinador')})
 
     )
 
