@@ -5493,17 +5493,14 @@ def panel_coordinador(request):
 # ============================================
 @login_required
 def registro(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-
-    # Solo coordinador
+    # Si no es coordinador → fuera
     if not request.user.empresa_coordinador:
         return redirect('home')
 
     empresa = request.user.empresa_coordinador
 
-    etapa = request.GET.get('etapa')
-    tabla = request.GET.get('tabla')
+    etapa_slug = request.GET.get('etapa')
+    tabla = request.GET.get('tabla')  # entrada, salida, oportunidad
 
     MAPA_ETAPAS = {
         'extraccion': 1,
@@ -5514,13 +5511,31 @@ def registro(request):
         'fin': 6,
     }
 
-    etapa_seleccionada = MAPA_ETAPAS.get(etapa)
+    id_etapa = MAPA_ETAPAS.get(etapa_slug)
+    etapa_obj = Etapa.objects.filter(id_etapa=id_etapa).first()
 
-    context = {
-        'empresa': empresa,
-        'etapa': etapa,
-        'tabla': tabla,
-        'etapa_seleccionada': etapa_seleccionada,
+    registros = []
+
+    # ----------------------------
+    # Selección dinámica de tabla
+    # ----------------------------
+    MODELOS = {
+        "entrada": Entrada,
+        "salida": Salida,
+        "oportunidad": Oportunidades,
     }
 
-    return render(request, 'coordinador/registro.html', context)
+    Modelo = MODELOS.get(tabla)
+
+    if Modelo and etapa_obj:
+        registros = Modelo.objects.filter(
+            id_area__id_empresa=empresa,
+            etapa=etapa_obj
+        )
+
+    return render(request, 'coordinador/registro.html', {
+        'empresa': empresa,
+        'etapa': etapa_slug,
+        'tabla': tabla,
+        'registros': registros,
+    })

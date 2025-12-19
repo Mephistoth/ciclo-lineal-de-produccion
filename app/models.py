@@ -37,19 +37,6 @@ class AreaEmpresa(models.Model):
         return self.nombre_area()    
 
 
-
-
-# class CicloArea(models.Model):
-#     id_ciclo = models.AutoField(primary_key=True)
-#     nombre = models.CharField(max_length=40)
-#     descripcion = models.CharField(max_length=40)
-#     fecha = models.DateField()
-#     area = models.ForeignKey(AreaEmpresa, on_delete=models.CASCADE)
-#     activo = models.BooleanField()
-
-#     def __str__(self):
-#         return self.nombre
-
 class Etapa(models.Model):
     id_etapa = models.AutoField(primary_key=True)
     nombre  = models.CharField(max_length=50)
@@ -144,6 +131,18 @@ class CVUsuario(models.Model):
 
     def __str__(self):
         return f"CV de {self.usuario.username} ({self.timestamp})"
+
+
+# class CicloArea(models.Model):
+#     id_ciclo = models.AutoField(primary_key=True)
+#     nombre = models.CharField(max_length=40)
+#     descripcion = models.CharField(max_length=40)
+#     fecha = models.DateField()
+#     area = models.ForeignKey(AreaEmpresa, on_delete=models.CASCADE)
+#     activo = models.BooleanField()
+
+#     def __str__(self):
+#         return self.nombre
 
 
 
