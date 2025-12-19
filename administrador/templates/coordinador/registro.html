@@ -42,7 +42,10 @@
 
             <p class="text-center mb-4">
                 Empresa asignada:
-                <strong>{{ user.empresa_coordinador.nombre }}</strong>
+                <strong>{{ user.empresa_coordinador.nombre }}</strong> <br>
+
+                ID Empresa en Base de Datos:
+                <strong>{{ user.empresa_coordinador.id_empresa }}</strong>
             </p>
 
             <!-- ===== BOTONES ETAPAS ===== -->
@@ -153,7 +156,7 @@
 
             {% endif %}
 
-            
+
             {% else %}
             <div class="alert alert-danger text-center mt-5">
                 No tienes una empresa asignada como coordinador.
