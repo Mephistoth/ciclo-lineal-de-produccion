@@ -11,7 +11,8 @@ from .views import homeAdmin, home_empresa, tablasExtraccion, entradasExtraccion
                 ReporteExcelEntradaUso, ReporteExcelSalidaUso, ReporteExcelOportunidadUso, ReporteExcelEntradaFin, ReporteExcelSalidaFin, ReporteExcelOportunidadFin, log_telegan, ia_semantica, descargar_resumen, \
                 procesamiento_area, procesamiento_ideas, home_procesamiento, procesamiento_aempresa, admin_usuarios, editar_usuario, eliminar_usuario, resetear_clave, crear_usuario, notificaciones, \
                 enviar_recordatorio_view, enviar_mensaje_todos, form_mensaje_todos, menu_notificaciones, notificaciones_comuna, form_mensaje_comuna, enviar_mensaje_comuna, ver_cv, descargar_cv, procesamiento_palabra_clave ,\
-                asignar_coordinador, quitar_coordinador, panel_coordinador, registro
+                asignar_coordinador, quitar_coordinador, panel_coordinador, registro, frecuencias, graficos, coordina_usuarios, crear_usuario_coordinacion, ver_cv_coordinacion, editar_usuario_coordinacion, \
+                eliminar_usuario_coordinacion, resetear_clave_coordinacion
 
 urlpatterns = [
     path('home_admin', homeAdmin, name='home_admin'),
@@ -156,6 +157,15 @@ urlpatterns = [
     path('usuarios/quitar-coordinador/<int:user_id>/', quitar_coordinador, name='quitar_coordinador'),
     path('coordinador/', panel_coordinador, name='panel_coordinador'),
     path('registro/', registro, name='registro'),
+    path('frecuencias/', frecuencias, name='frecuencias'),
+    path('graficos/', graficos, name='graficos'),
+    path('coordina_usuarios/', coordina_usuarios, name='coordina_usuarios'),
+    path("coordinador/usuarios/crear/", crear_usuario_coordinacion, name="crear_usuario_coordinacion"),
+    path("coordinador/ver_cv/<int:user_id>/", ver_cv_coordinacion, name="ver_cv_coordinacion"),
+    path("coordinador/usuarios/editar/<int:user_id>/", editar_usuario_coordinacion, name="editar_usuario_coordinacion"),
+    path("coordinador/usuarios/eliminar/<int:user_id>/", eliminar_usuario_coordinacion, name="eliminar_usuario_coordinacion"),
+    path("coordinador/usuarios/resetear/<int:user_id>/", resetear_clave_coordinacion, name="resetear_clave_coordinacion"),
+
 
 
     

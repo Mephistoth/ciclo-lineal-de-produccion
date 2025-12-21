@@ -164,8 +164,7 @@ def tablasDiseño(request,id):
                 empresa = Empresa.objects.filter(id_empresa = id)
 
                 registros = RegistroTrabajador.objects.filter(usuario=request.user)
-                etapas = Etapa.objects.values_list("id_etapa", flat=True).filter(nombre="Extraccion materia prima")
-                etapa = Etapa.objects.get(nombre = "Diseño y produccion") #trar solo la ID de la etapa "Extraccion materia prima"
+                etapa = Etapa.objects.get(nombre = "Diseño y produccion") #trar solo la ID de la etapa "Diseno y produccion"
                 #empresa = Empresa.objects.get(id)
                 empresaArea = RegistroTrabajador.objects.all()
                 
@@ -5539,3 +5538,450 @@ def registro(request):
         'tabla': tabla,
         'registros': registros,
     })
+
+def frecuencias(request):
+    # -------------------------
+    #  Mapa de slugs a ID de etapa (local dentro del def)
+    # -------------------------
+    MAPA_ETAPAS = {
+        'extraccion': 1,
+        'diseno': 2,
+        'logistica': 3,
+        'compra': 4,
+        'uso': 5,
+        'fin': 6,
+    }
+
+    # -------------------------
+    #  Validar que el coordinador tenga empresa
+    # -------------------------
+    empresa = request.user.empresa_coordinador
+    if not empresa:
+        return render(request, "error.html", {"mensaje": "No tienes una empresa asignada."})
+
+    # -------------------------
+    #  Obtener etapa desde GET
+    # -------------------------
+    etapa_slug = request.GET.get("etapa")
+    if not etapa_slug:
+        # Página inicial sin etapa seleccionada
+        return render(request, "coordinador/frecuencias.html", {
+            "etapa": None,
+            "areas": None,
+            "entradas_count": [],
+            "salidas_count": [],
+            "oportunidades_count": [],
+        })
+
+    # -------------------------
+    #  Obtener el objeto Etapa
+    # -------------------------
+    id_etapa = MAPA_ETAPAS.get(etapa_slug)
+    if not id_etapa:
+        return render(request, "error.html", {"mensaje": "Etapa inválida."})
+
+    try:
+        etapa_obj = Etapa.objects.get(id_etapa=id_etapa)
+    except Etapa.DoesNotExist:
+        return render(request, "error.html", {"mensaje": "La etapa seleccionada no existe."})
+
+    # -------------------------
+    # Obtener áreas de la empresa
+    # -------------------------
+    areas = AreaEmpresa.objects.filter(id_empresa=empresa.id_empresa)
+
+    # -------------------------
+    #  Contar Entradas / Salidas / Oportunidades por área
+    # -------------------------
+    entradas_count = (
+        Entrada.objects.filter(etapa=etapa_obj, id_area__in=areas)
+        .values("id_area")
+        .annotate(total=Count("id_area"))
+    )
+
+    salidas_count = (
+        Salida.objects.filter(etapa=etapa_obj, id_area__in=areas)
+        .values("id_area")
+        .annotate(total=Count("id_area"))
+    )
+
+    oportunidades_count = (
+        Oportunidades.objects.filter(etapa=etapa_obj, id_area__in=areas)
+        .values("id_area")
+        .annotate(total=Count("id_area"))
+    )
+
+    # -------------------------
+    #  Renderizar template
+    # -------------------------
+    return render(request, "coordinador/frecuencias.html", {
+        "etapa": etapa_slug,
+        "etapa_display": etapa_obj.nombre,
+        "areas": areas,
+        "entradas_count": entradas_count,
+        "salidas_count": salidas_count,
+        "oportunidades_count": oportunidades_count,
+    })
+
+def graficos(request):
+    # -----------------------
+    # 1. Validar coordinador
+    # -----------------------
+    empresa = getattr(request.user, 'empresa_coordinador', None)
+    if not empresa:
+        return render(request, "error.html", {"mensaje": "No tienes una empresa asignada."})
+
+    # -----------------------
+    # 2. Diccionario de etapas
+    # -----------------------
+    etapas = {
+        "extraccion": "Extracción Materia Prima",
+        "diseno": "Diseño y Producción",
+        "logistica": "Logística",
+        "compra": "Compra",
+        "uso": "Uso y Consumo",
+        "fin": "Fin de Vida",
+    }
+
+    # -----------------------
+    # 3. Obtener etapa seleccionada
+    # -----------------------
+    etapa_slug = request.GET.get("etapa")
+    etapa_obj = None
+    if etapa_slug:
+        # Buscar objeto Etapa
+        for slug, nombre in etapas.items():
+            if slug == etapa_slug:
+                etapa_obj = Etapa.objects.filter(nombre=nombre).first()
+                break
+
+    # -----------------------
+    # 4. Obtener áreas de la empresa
+    # -----------------------
+    areas = AreaEmpresa.objects.filter(id_empresa=empresa.id_empresa)
+
+    # -----------------------
+    # 5. Obtener área seleccionada
+    # -----------------------
+    area_id = request.GET.get("area")
+    area_grafico = None
+    cantidad_datos_dicc = []
+    cantidad_datos_dicc_salida = []
+    cantidad_datos_dicc_oportunidad = []
+
+    if area_id and etapa_obj:
+        area_grafico = areas.filter(id_area=area_id)
+
+        # Entradas
+        entradas = (
+            Entrada.objects.filter(etapa=etapa_obj, id_area__id_area=area_id)
+            .values('fecha')
+            .annotate(total=Count('id_area'))
+            .order_by('fecha')
+        )
+        cantidad_datos_dicc = [(str(e['fecha']), e['total']) for e in entradas]
+
+        # Salidas
+        salidas = (
+            Salida.objects.filter(etapa=etapa_obj, id_area__id_area=area_id)
+            .values('fecha')
+            .annotate(total=Count('id_area'))
+            .order_by('fecha')
+        )
+        cantidad_datos_dicc_salida = [(str(s['fecha']), s['total']) for s in salidas]
+
+        # Oportunidades
+        oportunidades = (
+            Oportunidades.objects.filter(etapa=etapa_obj, id_area__id_area=area_id)
+            .values('fecha')
+            .annotate(total=Count('id_area'))
+            .order_by('fecha')
+        )
+        cantidad_datos_dicc_oportunidad = [(str(o['fecha']), o['total']) for o in oportunidades]
+
+    # -----------------------
+    # 6. Renderizar template
+    # -----------------------
+    return render(request, "coordinador/graficos.html", {
+        "etapas": etapas,
+        "etapa": etapa_slug,
+        "areas": areas,
+        "area_grafico": area_grafico,
+        "cantidad_datos_dicc": cantidad_datos_dicc,
+        "cantidad_datos_dicc_salida": cantidad_datos_dicc_salida,
+        "cantidad_datos_dicc_oportunidad": cantidad_datos_dicc_oportunidad,
+    })
+
+@login_required
+def coordina_usuarios(request):
+    """
+    Muestra los usuarios de la empresa asignada al coordinador logueado.
+    """
+    empresa_seleccionada = getattr(request.user, "empresa_coordinador", None)
+    usuarios_area = None
+
+    if empresa_seleccionada:
+        # Obtener las áreas de la empresa del coordinador
+        areas_empresa = AreaEmpresa.objects.filter(id_empresa=empresa_seleccionada)
+
+        # Obtener los usuarios registrados en esas áreas
+        usuarios_area = RegistroTrabajador.objects.filter(
+            id_area__in=areas_empresa
+        ).select_related("usuario", "id_area")
+
+    context = {
+        "empresa_seleccionada": empresa_seleccionada,
+        "usuarios_area": usuarios_area,
+    }
+
+    return render(request, "coordinador/usuarios.html", context)
+
+def crear_usuario_coordinacion(request):
+    # Empresa del coordinador (NO viene por GET)
+    empresa = request.user.empresa_coordinador  
+    empresa_id = empresa.id_empresa
+
+    # Áreas solo de ESA empresa
+    areas = AreaEmpresa.objects.filter(id_empresa=empresa_id)
+
+    if request.method == "POST":
+        username = request.POST.get("username", "").strip()
+        nombre = request.POST.get("nombre", "").strip()
+        apellido = request.POST.get("apellido", "").strip()
+        email = request.POST.get("email", "").strip()
+        telefono = request.POST.get("telefono", "").strip()
+        area_id = request.POST.get("area")
+
+        errores = []
+
+        # Validación campos obligatorios
+        if not username: errores.append("El username es obligatorio.")
+        if not nombre: errores.append("El nombre es obligatorio.")
+        if not apellido: errores.append("El apellido es obligatorio.")
+        if not email: errores.append("El email es obligatorio.")
+        if not telefono: errores.append("El teléfono es obligatorio.")
+        if not area_id: errores.append("Debes seleccionar un área.")
+
+        # Validación de teléfono (9 dígitos)
+        if telefono and not re.fullmatch(r"\d{9}", telefono):
+            errores.append("El teléfono debe tener exactamente 9 dígitos.")
+
+        if errores:
+            for e in errores:
+                messages.error(request, e)
+
+            # Se recarga el formulario manteniendo áreas
+            return render(request, "coordinador/crear_usuario.html", {
+                "areas": areas,
+                "empresa_id": empresa_id
+            })
+
+        # Generar clave temporal
+        clave_temporal = generar_clave()
+
+        # Crear usuario con empresa FIJA
+        usuario = Usuario.objects.create_user(
+            username,
+            nombre,
+            apellido,
+            telefono,
+            email,
+            clave_temporal
+        )
+        usuario.empresa = empresa
+        usuario.save()
+
+        # Crear registro del trabajador
+        RegistroTrabajador.objects.create(
+            usuario=usuario,
+            id_area_id=area_id,
+            descripcion="Usuario creado por Coordinación"
+        )
+
+        # Enviar email con contraseña
+        send_mail(
+            subject="Tu cuenta ha sido creada",
+            message=f"Hola {nombre}, tu clave temporal es: {clave_temporal}",
+            from_email="no-reply@tuapp.com",
+            recipient_list=[email],
+        )
+
+        messages.success(request, "Usuario creado correctamente.")
+        return redirect("/coordinador/usuarios")
+
+    return render(request, "coordinador/crear_usuario.html", {
+        "areas": areas,
+        "empresa_id": empresa_id
+    })
+
+def ver_cv_coordinacion(request, user_id):
+    # Usuario autenticado
+    coordinador = request.user
+
+    # Verificar que tenga empresa asignada
+    if not coordinador.empresa_coordinador:
+        return HttpResponseForbidden("No tienes una empresa asignada.")
+
+    # Obtener usuario a visualizar
+    usuario = get_object_or_404(Usuario, id=user_id)
+
+    # Verificar que pertenece a la empresa del coordinador
+    pertenece = RegistroTrabajador.objects.filter(
+        usuario=usuario,
+        id_area__id_empresa=coordinador.empresa_coordinador.id_empresa
+    ).exists()
+
+    if not pertenece:
+        return HttpResponseForbidden("No puedes ver el CV de un usuario de otra empresa.")
+
+    # Obtener CV
+    cv = usuario.cvusuario_set.first()
+
+    # Obtener palabras clave
+    palabras = []
+    if cv:
+        palabras = [
+            cv.palabra1, cv.palabra2, cv.palabra3, cv.palabra4, cv.palabra5,
+            cv.palabra6, cv.palabra7, cv.palabra8, cv.palabra9, cv.palabra10,
+        ]
+        palabras = [p for p in palabras if p]
+
+    return render(request, "coordinador/ver_cv.html", {
+        "usuario": usuario,
+        "cv": cv,
+        "palabras": palabras
+    })
+
+def editar_usuario_coordinacion(request, user_id):
+    # Usuario a editar
+    usuario = get_object_or_404(Usuario, id=user_id)
+
+    # Empresa del coordinador (clave)
+    empresa = request.user.empresa_coordinador
+
+    if not empresa:
+        messages.error(request, "No tienes una empresa asignada.")
+        return redirect("coordina_usuarios")
+
+    # Registro del trabajador (puede no existir)
+    registro = RegistroTrabajador.objects.filter(usuario=usuario).first()
+
+    # Áreas SOLO de la empresa del coordinador
+    areas = AreaEmpresa.objects.filter(id_empresa=empresa)
+
+    if request.method == "POST":
+        nombre = request.POST.get("nombre", "").strip()
+        email = request.POST.get("email", "").strip()
+        telefono = request.POST.get("telefono", "").strip()
+        area_id = request.POST.get("area")
+
+        # Validación básica
+        if not nombre:
+            messages.error(request, "El nombre no puede estar vacío.")
+            return redirect(request.path)
+
+        # Actualización del usuario
+        usuario.first_name = nombre
+        usuario.email = email
+        usuario.telefono = telefono if telefono != "" else None
+        usuario.save()
+
+        # Validar que el área existe y pertenece a la empresa del coordinador
+        try:
+            nueva_area = AreaEmpresa.objects.get(id_area=area_id, id_empresa=empresa)
+        except AreaEmpresa.DoesNotExist:
+            messages.error(request, "El área seleccionada no pertenece a tu empresa.")
+            return redirect(request.path)
+
+        # Actualizar o crear registro de trabajador
+        if registro:
+            registro.id_area = nueva_area
+            registro.save()
+        else:
+            RegistroTrabajador.objects.create(
+                usuario=usuario,
+                id_area=nueva_area,
+                descripcion="Asignado desde edición de usuario por coordinador"
+            )
+
+        messages.success(request, "Usuario actualizado correctamente.")
+        return redirect("coordina_usuarios")
+
+    return render(request, "coordinador/editar_usuario.html", {
+        "usuario": usuario,
+        "registro": registro,
+        "areas": areas,
+    })
+
+def eliminar_usuario_coordinacion(request, user_id):
+    usuario = get_object_or_404(Usuario, id=user_id)
+
+    # Empresa del coordinador
+    empresa = request.user.empresa_coordinador
+
+    if not empresa:
+        messages.error(request, "No tienes una empresa asignada.")
+        return redirect("coordina_usuarios")
+
+    # Validar que el usuario pertenece a la empresa del coordinador
+    registro = RegistroTrabajador.objects.filter(usuario=usuario).first()
+
+    if not registro or registro.id_area.id_empresa != empresa:
+        messages.error(request, "No puedes eliminar usuarios que no pertenecen a tu empresa.")
+        return redirect("coordina_usuarios")
+
+    # Operación segura: solo por POST
+    if request.method == "POST":
+        usuario.delete()
+        messages.success(request, "Usuario eliminado correctamente.")
+        return redirect("coordina_usuarios")
+
+    # Si llega por GET accidentalmente → eliminar igual, mismo que en tu admin
+    usuario.delete()
+    messages.success(request, "Usuario eliminado correctamente.")
+    return redirect("coordina_usuarios")
+
+def resetear_clave_coordinacion(request, user_id):
+    if request.method != "POST":
+        return redirect("coordina_usuarios")
+
+    try:
+        usuario = Usuario.objects.get(pk=user_id)
+    except Usuario.DoesNotExist:
+        messages.error(request, "El usuario no existe.")
+        return redirect("coordina_usuarios")
+
+    # Empresa del coordinador
+    empresa = request.user.empresa_coordinador
+
+    # Validar que el usuario pertenece a la empresa del coordinador
+    registro = RegistroTrabajador.objects.filter(usuario=usuario).first()
+
+    if not registro or registro.id_area.id_empresa != empresa:
+        messages.error(request, "No puedes resetear la clave de un usuario que no pertenece a tu empresa.")
+        return redirect("coordina_usuarios")
+
+    # Generar nueva clave
+    nueva_clave = generar_clave()
+    usuario.password = make_password(nueva_clave)
+    usuario.save()
+
+    # Enviar email
+    send_mail(
+        subject="Tu nueva contraseña",
+        message=(
+            f"Hola {usuario.first_name},\n\n"
+            f"Tu nueva contraseña es:\n\n{nueva_clave}\n\n"
+            "Por favor cámbiala después de iniciar sesión."
+        ),
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=[usuario.email],
+        fail_silently=False,
+    )
+
+    messages.success(
+        request,
+        f"Se generó una nueva clave y se envió a {usuario.email}."
+    )
+
+    return redirect("coordina_usuarios")
