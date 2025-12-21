@@ -97,7 +97,7 @@
                                 </button>
                             </form>
 
-                            <form action="{% url 'resetear_usuario_coordinacion' registro.usuario.id %}" method="POST"
+                            <form action="{% url 'resetear_clave_coordinacion' registro.usuario.id %}" method="POST"
                                 style="display:inline;">
                                 {% csrf_token %}
                                 <button class="btn btn-outline-secondary btn-sm"
